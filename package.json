@@ -1,11 +1,14 @@
 {
-  "name": "athena",
+  "name": "minerva",
   "version": "2.0.0",
-  "description": "The new and improved Athena.",
+  "description": "The new and improved...",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Oracle9",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.20.0"
+  }
 }
