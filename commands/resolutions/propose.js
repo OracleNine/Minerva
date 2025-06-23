@@ -68,42 +68,14 @@ module.exports = {
                 try {
                     const confirmation = await response.resource.message.awaitMessageComponent({ filter: collectorFilter, time: 3_600_000 });
 
-                    // Get the class of the resolution
+                    // Check if the proposal is an amendment of an official document
                     if (confirmation.values[0] === "amd_admin" || confirmation.values[0] === "amd_rp" || confirmation.values[0] === "amd_format" || confirmation.values[0] === "amd_community") {
-
-                    } else if () {
+                        // Now generate an appropriate modal 
                         
-                    }
-                    switch (confirmation.values[0]) {
-                        case "amd_admin":
-                            console.log("1");
-                            break;
-                        case "amd_rp":
-                            console.log("2");
-                            break;
-                        case "amd_format":
-                            console.log("3");
-                            break;
-                        case "amd_community":
-                            console.log("4");
-                            break;
-                        case "app_member":
-                            console.log("5");
-                            break;
-                        case "app_peer":
-                            console.log("6");
-                            break;
-                        case "inj_ip":
-                            console.log("7");
-                            break;
-                        case "inj_rp":
-                            console.log("8");
-                            break;
-                        case "inj_member":
-                            console.log("9");
-                            break;
-                    }
+                    // Check if the proposal is an application of membership or peerage
+                    } else if (confirmation.values[0] === "app_member" || confirmation.values[0] === "app_peer") {
 
+                    }
 
 
                 } catch {
