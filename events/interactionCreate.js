@@ -1,4 +1,5 @@
 const { Events, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
+const fs = require('node:fs');
 
 module.exports = {
 	name: Events.InteractionCreate,

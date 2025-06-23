@@ -25,7 +25,6 @@ for (const folder of commandFolders) {
 
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
-console.log(eventFiles);
 
 for (const file of eventFiles) {
 	const filePath = path.join(eventsPath, file);
@@ -35,6 +34,13 @@ for (const file of eventFiles) {
 	} else {
 		client.on(event.name, (...args) => event.execute(...args));
 	}
+}
+
+try {
+	const queue = fs.readFileSync("./queue.json", "utf8");
+	console.log(data);
+} catch (err) {
+	console.error(err);
 }
 
 client.login(token);
