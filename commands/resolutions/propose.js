@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, MessageFlags } = require('discord.js');
 const { peerId } = require('../../config.json');
 
 module.exports = {
@@ -11,7 +11,7 @@ module.exports = {
 
             // Build the menu for selecting the class of proposal
             const proposal_select = new StringSelectMenuBuilder()
-                .setCustomId("proposal_select")
+                .setCustomId("proposalSelect")
                 .setPlaceholder("Make a selection!")
                 .addOptions(
                     new StringSelectMenuOptionBuilder()
@@ -63,26 +63,7 @@ module.exports = {
                     flags: MessageFlags.Ephemeral
                 });
 
-                // Await a response
-                const collectorFilter = i => i.user.id === interaction.user.id;
-                try {
-                    const confirmation = await response.resource.message.awaitMessageComponent({ filter: collectorFilter, time: 3_600_000 });
-
-                    // Check if the proposal is an amendment of an official document
-                    if (confirmation.values[0] === "amd_admin" || confirmation.values[0] === "amd_rp" || confirmation.values[0] === "amd_format" || confirmation.values[0] === "amd_community") {
-                        // Now generate an appropriate modal 
-
-                    // Check if the proposal is an application of membership or peerage
-                    } else if (confirmation.values[0] === "app_member" || confirmation.values[0] === "app_peer") {
-                        // Now generate an appropriate modal
-
-                    }
-
-
-                } catch {
-                    // User waits too long
-                    await interaction.editReply({ content: "Confirmation not received. Try running the command again. `/propose`", components: [] });
-                }
+                // The response is detected by interactionCreate.js
          } else {
             // User is not a peer
             await interaction.reply({ content: "No permission.", flags: MessageFlags.Ephemeral });
