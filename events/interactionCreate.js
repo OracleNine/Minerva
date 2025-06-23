@@ -20,11 +20,20 @@ module.exports = {
 			
 		// check for modal submissions
 		} else if (interaction.isModalSubmit()) {
+			// if the modal submission corresponds to an amendment, get those values
 			if (interaction.customId === 'amendmentModal') {
-				console.log("Received a resolution.");
-				await interaction.reply({ content: "Your submission has been added to the queue."});
+
+				const amendInTitle = interaction.fields.getTextInputValue("amendmentTitle");
+				const amendInSum = interaction.fields.getTextInputValue("amendmentSummary");
+				const amendInDets = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
+
+				console.log(amendInTitle, amendInSum, amendInDets);
+
+				await interaction.reply("Your submission has been added to the queue. View the queue with `/queue`.")
 			}		
+		// check for select menu interactions
 		} else if (interaction.isStringSelectMenu()) {
+			// if someone is choosing a proposal class, show the appropriate modal
 			if (interaction.customId === "proposalSelect") {
 				console.log(interaction.values[0]);
 				// Build a modal based on the selection
@@ -35,21 +44,38 @@ module.exports = {
 							.setCustomId('amendmentModal')
 							.setTitle('Amendment of an Official Document');
 
+						const amendmentTitle = new TextInputBuilder()
+							.setCustomId('amendmentTitle')
+							.setLabel("Subject")
+							.setPlaceholder("The title of the amendment.")
+							.setStyle(TextInputStyle.Short);
+
 						const amendmentSummaryInput = new TextInputBuilder()
 							.setCustomId('amendmentSummary')
 							.setLabel("Summary")
+							.setPlaceholder("A summary of the changes you would like to make.")
 							.setStyle(TextInputStyle.Paragraph);
 
-						const amendmentDetailsInput = new TextInputBuilder()
-							.setCustomId('amendmentDetails')
+						const amendmentDetails1 = new TextInputBuilder()
+							.setCustomId('amendmentDetails1')
 							.setLabel("Details")
+							.setPlaceholder("The exact changes to the text.")
 							.setStyle(TextInputStyle.Paragraph);
-
-						const amendmentFirstRow = new ActionRowBuilder().addComponents(amendmentSummaryInput);
-						const amendmentSecondRow = new ActionRowBuilder().addComponents(amendmentDetailsInput);
+						
+						const amendmentDetails2 = new TextInputBuilder()
+							.setCustomId('amendmentDetails2')
+							.setLabel("Details (cont.)")
+							.setPlaceholder("Use this in case you hit the character limit on the box above. Leave this space blank if not needed.")
+							.setStyle(TextInputStyle.Paragraph)
+							.setRequired(false);
+						
+						const amendZeroRow = new ActionRowBuilder().addComponents(amendmentTitle);
+						const amendFirstRow = new ActionRowBuilder().addComponents(amendmentSummaryInput);
+						const amendSecondRow = new ActionRowBuilder().addComponents(amendmentDetails1);
+						const amendThirdRow = new ActionRowBuilder().addComponents(amendmentDetails2);
 
 						// Add inputs to the modal
-						modal.addComponents(amendmentFirstRow, amendmentSecondRow);
+						modal.addComponents(amendZeroRow, amendFirstRow, amendSecondRow, amendThirdRow);
 
 						// Show the modal to the user
 						await interaction.showModal(modal);
