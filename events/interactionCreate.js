@@ -1,6 +1,7 @@
 const { Events, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
 const fs = require('node:fs');
 const qman = require("../cogs/queue-manager.js");
+const { peerId, chairId } = require("../config.json");
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -25,15 +26,28 @@ module.exports = {
 			// if the modal submission corresponds to an amendment, get those values
 			if (interaction.customId === 'amd_admin' || interaction.customId === "amd_rp" || interaction.customId === "amd_format" || interaction.customId === "amd_community") {
 
-				const amendInTitle = interaction.fields.getTextInputValue("amendmentTitle");
-				const amendInSum = interaction.fields.getTextInputValue("amendmentSummary");
-				const amendInDets = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
-				const amendUser = interaction.member.id;
-				const amendKind = interaction.customId;
+				const propAsObj = {};
 
-				let result = qman.addToQueue(amendUser, amendKind, amendInTitle, amendInSum, amendInDets);
+				propAsObj.user  = interaction.member.id;
+				propAsObj.subject = interaction.fields.getTextInputValue("amendmentTitle");
+				propAsObj.summary = interaction.fields.getTextInputValue("amendmentSummary");
+				propAsObj.details = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
+				propAsObj.kind = interaction.customId;
+
+				let result = qman.addToQueue(propAsObj);
 
 				await interaction.reply({ content: result, flags: MessageFlags.Ephemeral});
+			} else if (interaction.customId === "app_member" || interaction.customId === "app_peer") {
+				
+				const propAsObj = {};
+
+				propAsObj.user = interaction.member.id;
+				propAsObj.subject = interaction.fields.getTextInputValue("appSubject");
+				propAsObj.kind = interaction.customId;
+
+				let result = qman.addToQueue(propAsObj);
+
+				await interaction.reply({ content: result, flags: MessageFlags.Ephemeral });
 			}		
 		// check for select menu interactions
 		} else if (interaction.isStringSelectMenu()) {
@@ -86,8 +100,34 @@ module.exports = {
 
                     // Check if the proposal is an application of membership or peerage
                     } else if (interaction.values[0] === "app_member" || interaction.values[0] === "app_peer") {
-                        // Now generate an appropriate modal
 
+						// Make sure this is the Chair, because they are the only one who can make these kinds of proposals
+						if (interaction.member.roles.cache.has(chairId)) {
+							let dynTitle = "";
+							// Adjust the title of the modal depending on the option selected. There is probably a better way to do this but idk
+							if (interaction.values[0] === "app_member") { dynTitle = "Application for Membership"; }
+							if (interaction.values[0] === "app_peer") { dynTitle = "Application for Peerage"; }
+
+							// Now make the modal
+							const modal = new ModalBuilder()
+								.setCustomId(interaction.values[0])
+								.setTitle(dynTitle);
+
+							const applicationSubject = new TextInputBuilder()
+								.setCustomId("appSubject")
+								.setLabel("Subject")
+								.setPlaceholder("Username of the person you would like to promote.")
+								.setStyle(TextInputStyle.Short)
+								.setRequired(true)
+							
+							const appZeroRow = new ActionRowBuilder().addComponents(applicationSubject);
+							
+							modal.addComponents(appZeroRow);
+
+							await interaction.showModal(modal);
+						} else {
+							await interaction.reply("You are not the Chair!");
+						}
                     }
 			}
 		}

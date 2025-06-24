@@ -9,7 +9,7 @@ const fs = require('node:fs');
 // Vote-msg: If the proposal is active, this will be the ID of the message that people react to when they vote on the proposal. If the proposal is not active, this will be 0.
 
 // Add an item to the queue
-function addToQueue(user, kind, subject, summary, details) {
+function addToQueue(element) {
     // Fetch the latest version of the queue and store it as an object
     // I hate the fact that so much code is reused but I'll figure out how to simplify this later
     try {
@@ -18,27 +18,16 @@ function addToQueue(user, kind, subject, summary, details) {
         qAsObj = qAsObj["queue"];
 
         // First we will check if the user already has a proposal in the queue
-        const result = qAsObj.filter((proposal) => proposal["user"] == user);
-
-        // TODO: Why isnt this comparison working? 
-        console.log(result.length === 0);
+        const result = qAsObj.filter((proposal) => proposal["user"] == element.user);
 
         if (result.length === 0) {
             console.log("No prior proposals in the queue detected")
-            // Create a proposal object which we can add properties to
-            const propAsObj = {};
-
-            propAsObj.user = user;
-            propAsObj.kind = kind;
-            propAsObj.subject = subject;
-            propAsObj.summary = summary;
-            propAsObj.details = details;
 
             const newQObj = {
                 "queue": []
             }
-            
-            newQObj["queue"].push(propAsObj)
+
+            newQObj["queue"].push(element);
 
             let qAsStr = JSON.stringify(newQObj);
 
