@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 // Each entry in the queue has the folowing properties
 // User: ID of the user who submitted the proposal
-// Threshold: Threshold of the proposal
+// Kind: Classification of the proposal which determines the threshold
 // Subject: Subject of the proposal
 // Summary: Summary of the proposal
 // Details: Details of the proposal
@@ -9,7 +9,7 @@ const fs = require('node:fs');
 // Vote-msg: If the proposal is active, this will be the ID of the message that people react to when they vote on the proposal. If the proposal is not active, this will be 0.
 
 // Add an item to the queue
-function addToQueue(user, threshold, subject, summary, details) {
+function addToQueue(user, kind, subject, summary, details) {
     // Fetch the latest version of the queue and store it as an object
     // I hate the fact that so much code is reused but I'll figure out how to simplify this later
     try {
@@ -29,7 +29,7 @@ function addToQueue(user, threshold, subject, summary, details) {
             const propAsObj = {};
 
             propAsObj.user = user;
-            propAsObj.threshold = threshold;
+            propAsObj.kind = kind;
             propAsObj.subject = subject;
             propAsObj.summary = summary;
             propAsObj.details = details;
@@ -49,7 +49,7 @@ function addToQueue(user, threshold, subject, summary, details) {
                 console.error(error);
             }
 
-            return "Successful.";
+            return "Your proposal has been successfully added to the queue, and will be voted on in accordance with the Administrative Charter.";
 
         } else {
             return "You already have an item in the queue. Remove it first with `/remove`.";
@@ -83,8 +83,21 @@ function removeFrmQueue(user) {
         console.error(err);
     }
 }
+function seeQueue() {
+    try {
+        const queue = fs.readFileSync("./queue.json", "utf8");
+	    let qAsObj = JSON.parse(queue);
+        let qItems = qAsObj["queue"];
+
+        return qItems;
+
+    } catch (err) {
+        console.error(err);
+    }
+}
 
 module.exports = {
     addToQueue,
-    removeFrmQueue
+    removeFrmQueue,
+    seeQueue
 }

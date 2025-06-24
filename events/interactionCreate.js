@@ -23,15 +23,15 @@ module.exports = {
 		// check for modal submissions
 		} else if (interaction.isModalSubmit()) {
 			// if the modal submission corresponds to an amendment, get those values
-			if (interaction.customId === 'amendmentModal') {
+			if (interaction.customId === 'amd_admin' || interaction.customId === "amd_rp" || interaction.customId === "amd_format" || interaction.customId === "amd_community") {
 
 				const amendInTitle = interaction.fields.getTextInputValue("amendmentTitle");
 				const amendInSum = interaction.fields.getTextInputValue("amendmentSummary");
 				const amendInDets = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
 				const amendUser = interaction.member.id;
-				const amendThreshold = 0.67;
+				const amendKind = interaction.customId;
 
-				let result = qman.addToQueue(amendUser, amendThreshold, amendInTitle, amendInSum, amendInDets);
+				let result = qman.addToQueue(amendUser, amendKind, amendInTitle, amendInSum, amendInDets);
 
 				await interaction.reply({ content: result, flags: MessageFlags.Ephemeral});
 			}		
@@ -45,7 +45,7 @@ module.exports = {
 				//If the selection was an amendment of an official document
 				if (interaction.values[0] === "amd_admin" || interaction.values[0] === "amd_rp" || interaction.values[0] === "amd_format" || interaction.values[0] === "amd_community") {
                         const modal = new ModalBuilder()
-							.setCustomId('amendmentModal')
+							.setCustomId(interaction.values[0])
 							.setTitle('Amendment of an Official Document');
 
 						const amendmentTitle = new TextInputBuilder()
