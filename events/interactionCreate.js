@@ -1,5 +1,6 @@
 const { Events, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
 const fs = require('node:fs');
+const qman = require("../cogs/queue-manager.js");
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -27,10 +28,12 @@ module.exports = {
 				const amendInTitle = interaction.fields.getTextInputValue("amendmentTitle");
 				const amendInSum = interaction.fields.getTextInputValue("amendmentSummary");
 				const amendInDets = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
+				const amendUser = interaction.member.id;
+				const amendThreshold = 0.67;
 
-				console.log(amendInTitle, amendInSum, amendInDets);
+				qman.addToQueue(amendUser, amendThreshold, amendInTitle, amendInSum, amendInDets);
 
-				await interaction.reply("Your submission has been added to the queue. View the queue with `/queue`.")
+				await interaction.reply({ content: "Your submission has been added to the queue. View the queue with `/queue`.", flags: MessageFlags.Ephemeral});
 			}		
 		// check for select menu interactions
 		} else if (interaction.isStringSelectMenu()) {

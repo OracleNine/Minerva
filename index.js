@@ -36,11 +36,4 @@ for (const file of eventFiles) {
 	}
 }
 
-try {
-	const queue = fs.readFileSync("./queue.json", "utf8");
-	console.log(data);
-} catch (err) {
-	console.error(err);
-}
-
 client.login(token);
