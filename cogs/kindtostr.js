@@ -8,6 +8,16 @@ function kindToStr(elem) {
             return "Amendment of the Formatting Guidelines";
         case "amd_community":
             return "Amendment of the Community Guidelines";
+        case "app_member":
+            return "Application for Membership";
+        case "app_peer":
+            return "Application for Peerage";
+        case "inj_ip":
+            return "Injunction on Intellectual Property";
+        case "inj_rp":
+            return "Injunction on Roleplay Action";
+        case "inj_member":
+            return "Injunction on User Behavior";
     }
 }
 

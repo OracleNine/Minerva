@@ -25,35 +25,35 @@ module.exports = {
 			
 		// check for modal submissions
 		} else if (interaction.isModalSubmit()) {
+
+			const peerResolutionClasses = ["amd_admin", "amd_rp", "amd_format", "amd_community", "app_member", "app_peer", "inj_rp", "inj_ip", "inj_member"];
 			// if the modal submission corresponds to an amendment, get those values
-			if (interaction.customId === 'amd_admin' || interaction.customId === "amd_rp" || interaction.customId === "amd_format" || interaction.customId === "amd_community") {
+			if (peerResolutionClasses.indexOf(interaction.customId) !== -1) {
 
 				const propAsObj = {};
 
 				propAsObj.user  = interaction.member.id;
 				propAsObj.date = dayjs();
-				propAsObj.subject = interaction.fields.getTextInputValue("amendmentTitle");
-				propAsObj.summary = interaction.fields.getTextInputValue("amendmentSummary");
-				propAsObj.details = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
 				propAsObj.kind = interaction.customId;
+
+				if (peerResolutionClasses.indexOf(interaction.customId) >= 0 && peerResolutionClasses.indexOf(interaction.customId) <= 3) {
+					propAsObj.subject = interaction.fields.getTextInputValue("amendmentTitle");
+					propAsObj.summary = interaction.fields.getTextInputValue("amendmentSummary");
+					propAsObj.details = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
+				}
+				if (peerResolutionClasses.indexOf(interaction.customId[0]) == 4 || peerResolutionClasses.indexOf(interaction.customId[0]) == 5) {
+					propAsObj.subject = interaction.fields.getTextInputValue("appSubject")
+				}
+				if (peerResolutionClasses.indexOf(interaction.customId[0]) >= 6|| peerResolutionClasses.indexOf(interaction.customId[0]) <= 8) {
+					propAsObj.subject = interaction.fields.getTextInputValue("injSubject")
+					propAsObj.details = interaction.fields.getTextInputValue("injDesc");
+					propAsObj.desire = interaction.fields.getTextInputValue("injOut")
+				}
 
 				let result = qman.addToQueue(propAsObj);
 
 				await interaction.reply({ content: result, flags: MessageFlags.Ephemeral});
-			} else if (interaction.customId === "app_member" || interaction.customId === "app_peer") {
-				
-				// Initialize the proposal as an object
-				const propAsObj = {};
-
-				propAsObj.user = interaction.member.id;
-				propAsObj.date = dayjs();
-				propAsObj.subject = interaction.fields.getTextInputValue("appSubject");
-				propAsObj.kind = interaction.customId;
-
-				let result = qman.addToQueue(propAsObj);
-
-				await interaction.reply({ content: result, flags: MessageFlags.Ephemeral });
-			}		
+			}
 		// check for select menu interactions
 		} else if (interaction.isStringSelectMenu()) {
 			// if someone is choosing a proposal class, show the appropriate modal
@@ -63,13 +63,13 @@ module.exports = {
 
 				let qAsObj = qman.fetchQueue();
 				let qItems = qAsObj["queue"];
-				const result = qItems.filter((proposal) => proposal["user"] == element.user);
+				const result = qItems.filter((proposal) => proposal["user"] == interaction.user.id);
 				
 				if (result.length === 0 && interaction.member.roles.cache.has(peerId)) {
+					let dynTitle = kindtostr.kindToStr(interaction.values[0]); // Convert the kind of resolution into a string that we can use to set the title of the modal
 
 					// If the user selected an amendment of an official document
 					if (interaction.values[0] === "amd_admin" || interaction.values[0] === "amd_rp" || interaction.values[0] === "amd_format" || interaction.values[0] === "amd_community") {
-						let dynTitle = kindtostr.kindToStr(interaction.values[0]);
 						
                         const modal = new ModalBuilder()
 							.setCustomId(interaction.values[0])
@@ -116,10 +116,6 @@ module.exports = {
 
 						// Make sure this is the Chair, because they are the only one who can make these kinds of proposals
 						if (interaction.member.roles.cache.has(chairId)) {
-							let dynTitle = "";
-							// Adjust the title of the modal depending on the option selected. There is probably a better way to do this but idk
-							if (interaction.values[0] === "app_member") { dynTitle = "Application for Membership"; }
-							if (interaction.values[0] === "app_peer") { dynTitle = "Application for Peerage"; }
 
 							// Now make the modal
 							const modal = new ModalBuilder()
@@ -141,7 +137,42 @@ module.exports = {
 						} else {
 							await interaction.reply("You are not the Chair!");
 						}
-                    }
+                    } else if (interaction.values[0] === "inj_ip" || interaction.values[0] === "inj_rp" || interaction.values[0] === "inj_member") {
+						
+						// Now make the modal
+						const modal = new ModalBuilder()
+							.setCustomId(interaction.values[0])
+							.setTitle(dynTitle);
+
+						const injunctionSubject = new TextInputBuilder()
+							.setCustomId("injSubject")
+							.setLabel("Subject")
+							.setPlaceholder("Username of the person you would like to censure.")
+							.setStyle(TextInputStyle.Short)
+							.setRequired(true)
+						
+						const injunctionDesc = new TextInputBuilder()
+							.setCustomId("injDesc")
+							.setLabel("Description of Incident")
+							.setPlaceholder("Give a detailed description of the offending behavior.")
+							.setStyle(TextInputStyle.Paragraph)
+							.setRequired(true)
+
+						const injunctionOutcome = new TextInputBuilder()
+							.setCustomId("injOut")
+							.setLabel("Preferential Outcome")
+							.setPlaceholder("How do you think the situation should be handled?")
+							.setStyle(TextInputStyle.Paragraph)
+							.setRequired(true)
+						
+						const appZeroRow = new ActionRowBuilder().addComponents(injunctionSubject);
+						const appFirstRow = new ActionRowBuilder().addComponents(injunctionDesc);
+						const appSecondRow = new ActionRowBuilder().addComponents(injunctionOutcome);
+						
+						modal.addComponents(appZeroRow, appFirstRow, appSecondRow);
+
+						await interaction.showModal(modal);
+					}
 				} else {
 					await interaction.reply({ content: "You have already submitted a proposal. Remove it with `/remove`, then do `/propose` again.", flags: MessageFlags.Ephemeral })
 				}

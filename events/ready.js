@@ -12,10 +12,12 @@ module.exports = {
 		let qItems = qAsObj["queue"];
 
 		if (qItems != []) {
+			// if queue is not empty, we need to check if a vote is active
 
+			
 		} else {
 			// if queue is empty
-			
+
 		}
 
 	},
