@@ -1,7 +1,9 @@
 const { Events, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
 const fs = require('node:fs');
 const qman = require("../cogs/queue-manager.js");
+const kindtostr = require("../cogs/kindtostr.js")
 const { peerId, chairId } = require("../config.json");
+const dayjs = require('dayjs')
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -29,6 +31,7 @@ module.exports = {
 				const propAsObj = {};
 
 				propAsObj.user  = interaction.member.id;
+				propAsObj.date = dayjs();
 				propAsObj.subject = interaction.fields.getTextInputValue("amendmentTitle");
 				propAsObj.summary = interaction.fields.getTextInputValue("amendmentSummary");
 				propAsObj.details = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
@@ -39,9 +42,11 @@ module.exports = {
 				await interaction.reply({ content: result, flags: MessageFlags.Ephemeral});
 			} else if (interaction.customId === "app_member" || interaction.customId === "app_peer") {
 				
+				// Initialize the proposal as an object
 				const propAsObj = {};
 
 				propAsObj.user = interaction.member.id;
+				propAsObj.date = dayjs();
 				propAsObj.subject = interaction.fields.getTextInputValue("appSubject");
 				propAsObj.kind = interaction.customId;
 
@@ -53,14 +58,22 @@ module.exports = {
 		} else if (interaction.isStringSelectMenu()) {
 			// if someone is choosing a proposal class, show the appropriate modal
 			if (interaction.customId === "proposalSelect") {
-				console.log(interaction.values[0]);
-				// Build a modal based on the selection
+				
+				// First we need to make sure this user has not already submitted a proposal.
 
-				//If the selection was an amendment of an official document
-				if (interaction.values[0] === "amd_admin" || interaction.values[0] === "amd_rp" || interaction.values[0] === "amd_format" || interaction.values[0] === "amd_community") {
+				let qAsObj = qman.fetchQueue();
+				let qItems = qAsObj["queue"];
+				const result = qItems.filter((proposal) => proposal["user"] == element.user);
+				
+				if (result.length === 0 && interaction.member.roles.cache.has(peerId)) {
+
+					// If the user selected an amendment of an official document
+					if (interaction.values[0] === "amd_admin" || interaction.values[0] === "amd_rp" || interaction.values[0] === "amd_format" || interaction.values[0] === "amd_community") {
+						let dynTitle = kindtostr.kindToStr(interaction.values[0]);
+						
                         const modal = new ModalBuilder()
 							.setCustomId(interaction.values[0])
-							.setTitle('Amendment of an Official Document');
+							.setTitle(dynTitle);
 
 						const amendmentTitle = new TextInputBuilder()
 							.setCustomId('amendmentTitle')
@@ -129,6 +142,9 @@ module.exports = {
 							await interaction.reply("You are not the Chair!");
 						}
                     }
+				} else {
+					await interaction.reply({ content: "You have already submitted a proposal. Remove it with `/remove`, then do `/propose` again.", flags: MessageFlags.Ephemeral })
+				}
 			}
 		}
 	},

@@ -1,12 +1,14 @@
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, MessageFlags } = require('discord.js');
 const { peerId } = require('../../config.json');
+const qman = require("../../cogs/queue-manager.js");
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('propose')
 		.setDescription('Add a proposal to the queue.'),
 	async execute(interaction) {
-        // Check if the user is a peer
+        // Check if the user is a peer, and ensure they do not have any proposals already in the queue
+
 		 if (interaction.member.roles.cache.has(peerId)) {
 
             // Build the menu for selecting the class of proposal
