@@ -31,9 +31,9 @@ module.exports = {
 				const amendUser = interaction.member.id;
 				const amendThreshold = 0.67;
 
-				qman.addToQueue(amendUser, amendThreshold, amendInTitle, amendInSum, amendInDets);
+				let result = qman.addToQueue(amendUser, amendThreshold, amendInTitle, amendInSum, amendInDets);
 
-				await interaction.reply({ content: "Your submission has been added to the queue. View the queue with `/queue`.", flags: MessageFlags.Ephemeral});
+				await interaction.reply({ content: result, flags: MessageFlags.Ephemeral});
 			}		
 		// check for select menu interactions
 		} else if (interaction.isStringSelectMenu()) {
