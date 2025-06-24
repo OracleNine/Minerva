@@ -21,7 +21,9 @@ function addToQueue(user, threshold, subject, summary, details) {
         const result = qAsObj.filter((proposal) => proposal["user"] == user);
 
         // TODO: Why isnt this comparison working? 
-        if (result == []) {
+        console.log(result.length === 0);
+
+        if (result.length === 0) {
             console.log("No prior proposals in the queue detected")
             // Create a proposal object which we can add properties to
             const propAsObj = {};
@@ -32,9 +34,13 @@ function addToQueue(user, threshold, subject, summary, details) {
             propAsObj.summary = summary;
             propAsObj.details = details;
 
-            qAsObj["queue"].push(propAsObj);
+            const newQObj = {
+                "queue": []
+            }
+            
+            newQObj["queue"].push(propAsObj)
 
-            let qAsStr = JSON.stringify(qAsObj);
+            let qAsStr = JSON.stringify(newQObj);
 
 
             try {
@@ -46,7 +52,7 @@ function addToQueue(user, threshold, subject, summary, details) {
             return "Successful.";
 
         } else {
-            return "You already have an item in the queue.";
+            return "You already have an item in the queue. Remove it first with `/remove`.";
         }
 
     } catch (err) {
