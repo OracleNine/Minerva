@@ -131,7 +131,7 @@ module.exports = {
 
 						await interaction.showModal(modal);
 					} else {
-						await interaction.reply("You are not the Chair!");
+						await interaction.reply({ content: "You are not the Chair!", flags: MessageFlags.Ephemeral });
 					}
 				} else if (interaction.values[0] === "inj_ip" || interaction.values[0] === "inj_rp" || interaction.values[0] === "inj_member") {
 					
