@@ -42,7 +42,7 @@ function addToQueue(element) {
         console.error(error);
     }
 
-    return "Your proposal has been successfully added to the queue, and will be voted on in accordance with the Administrative Charter.";
+    return "Your proposal has been successfully added to the queue. You can see all items in the queue with `/showqueue`.";
 }
 function removeFrmQueue(user) {
     // Need to make sure the queue exists and then store it as an object

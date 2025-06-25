@@ -36,6 +36,9 @@ module.exports = {
 				propAsObj.date = dayjs();
 				propAsObj.kind = interaction.customId;
 				propAsObj.active = false;
+				propAsObj.votemsg = "0";
+				propAsObj.enddate = "";
+				propAsObj.eligiblevoters = [];
 
 				if (peerResolutionClasses.indexOf(interaction.customId) >= 0 && peerResolutionClasses.indexOf(interaction.customId) <= 3) {
 					propAsObj.subject = interaction.fields.getTextInputValue("amendmentTitle");
