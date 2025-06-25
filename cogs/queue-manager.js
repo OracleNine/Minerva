@@ -25,15 +25,16 @@ function addToQueue(element) {
     let qAsObj = fetchQueue();
     let qItems = qAsObj["queue"]
 
-    // First we will check if the user already has a proposal in the queue
+
     qItems.push(element);
 
     // Update the queue object
 
     qAsObj["queue"] = qItems;
 
-    let qAsStr = JSON.stringify(qAsObj);
+    // Convert to string and then write to the json file
 
+    let qAsStr = JSON.stringify(qAsObj);
 
     try {
         fs.writeFileSync("./queue.json", qAsStr);
@@ -62,9 +63,22 @@ function removeFrmQueue(user) {
         console.error(err);
     }
 }
+function findActive() {
+    let qAsObj = fetchQueue();
+    let qItems = qAsObj["queue"];
+
+    const result = qItems.filter((proposal) => proposal["active"] == true);
+
+    if (result != []) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 module.exports = {
     addToQueue,
     removeFrmQueue,
-    fetchQueue
+    fetchQueue,
+    findActive
 }

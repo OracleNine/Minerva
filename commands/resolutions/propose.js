@@ -7,9 +7,13 @@ module.exports = {
 		.setName('propose')
 		.setDescription('Add a proposal to the queue.'),
 	async execute(interaction) {
-        // Check if the user is a peer, and ensure they do not have any proposals already in the queue
 
-		 if (interaction.member.roles.cache.has(peerId)) {
+        // Check if the user is a peer, and make sure they dont already have a proposal in the queue
+        let qAsObj = qman.fetchQueue();
+        let qItems = qAsObj["queue"];
+        const result = qItems.filter((proposal) => proposal["user"] == interaction.user.id);
+        
+        if (result.length === 0 && interaction.member.roles.cache.has(peerId)) {
 
             // Build the menu for selecting the class of proposal
             const proposal_select = new StringSelectMenuBuilder()
@@ -66,9 +70,11 @@ module.exports = {
                 });
 
                 // The response is detected by interactionCreate.js
-         } else {
-            // User is not a peer
+         } else if (!interaction.member.roles.cache.has(peerId)) {
             await interaction.reply({ content: "No permission.", flags: MessageFlags.Ephemeral });
-         }
-	},
+         } else if (result.length != 0) {
+            await interaction.reply({ content: "You have already submitted a proposal. Remove it with `/remove`, and then do `/propose`.", flags: MessageFlags.Ephemeral });
+	    }
+    }
+
 };

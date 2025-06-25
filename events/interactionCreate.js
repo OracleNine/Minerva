@@ -35,6 +35,7 @@ module.exports = {
 				propAsObj.user  = interaction.member.id;
 				propAsObj.date = dayjs();
 				propAsObj.kind = interaction.customId;
+				propAsObj.active = false;
 
 				if (peerResolutionClasses.indexOf(interaction.customId) >= 0 && peerResolutionClasses.indexOf(interaction.customId) <= 3) {
 					propAsObj.subject = interaction.fields.getTextInputValue("amendmentTitle");
@@ -44,7 +45,7 @@ module.exports = {
 				if (peerResolutionClasses.indexOf(interaction.customId[0]) == 4 || peerResolutionClasses.indexOf(interaction.customId[0]) == 5) {
 					propAsObj.subject = interaction.fields.getTextInputValue("appSubject")
 				}
-				if (peerResolutionClasses.indexOf(interaction.customId[0]) >= 6|| peerResolutionClasses.indexOf(interaction.customId[0]) <= 8) {
+				if (peerResolutionClasses.indexOf(interaction.customId[0]) >= 6 && peerResolutionClasses.indexOf(interaction.customId[0]) <= 8) {
 					propAsObj.subject = interaction.fields.getTextInputValue("injSubject")
 					propAsObj.details = interaction.fields.getTextInputValue("injDesc");
 					propAsObj.desire = interaction.fields.getTextInputValue("injOut")
@@ -58,123 +59,112 @@ module.exports = {
 		} else if (interaction.isStringSelectMenu()) {
 			// if someone is choosing a proposal class, show the appropriate modal
 			if (interaction.customId === "proposalSelect") {
-				
-				// First we need to make sure this user has not already submitted a proposal.
+				let dynTitle = kindtostr.kindToStr(interaction.values[0]); // Convert the kind of resolution into a string that we can use to set the title of the modal
 
-				let qAsObj = qman.fetchQueue();
-				let qItems = qAsObj["queue"];
-				const result = qItems.filter((proposal) => proposal["user"] == interaction.user.id);
-				
-				if (result.length === 0 && interaction.member.roles.cache.has(peerId)) {
-					let dynTitle = kindtostr.kindToStr(interaction.values[0]); // Convert the kind of resolution into a string that we can use to set the title of the modal
+				// If the user selected an amendment of an official document
+				if (interaction.values[0] === "amd_admin" || interaction.values[0] === "amd_rp" || interaction.values[0] === "amd_format" || interaction.values[0] === "amd_community") {
+					
+					const modal = new ModalBuilder()
+						.setCustomId(interaction.values[0])
+						.setTitle(dynTitle);
 
-					// If the user selected an amendment of an official document
-					if (interaction.values[0] === "amd_admin" || interaction.values[0] === "amd_rp" || interaction.values[0] === "amd_format" || interaction.values[0] === "amd_community") {
-						
-                        const modal = new ModalBuilder()
-							.setCustomId(interaction.values[0])
-							.setTitle(dynTitle);
+					const amendmentTitle = new TextInputBuilder()
+						.setCustomId('amendmentTitle')
+						.setLabel("Subject")
+						.setPlaceholder("The title of the amendment.")
+						.setStyle(TextInputStyle.Short);
 
-						const amendmentTitle = new TextInputBuilder()
-							.setCustomId('amendmentTitle')
-							.setLabel("Subject")
-							.setPlaceholder("The title of the amendment.")
-							.setStyle(TextInputStyle.Short);
+					const amendmentSummaryInput = new TextInputBuilder()
+						.setCustomId('amendmentSummary')
+						.setLabel("Summary")
+						.setPlaceholder("A summary of the changes you would like to make.")
+						.setStyle(TextInputStyle.Paragraph);
 
-						const amendmentSummaryInput = new TextInputBuilder()
-							.setCustomId('amendmentSummary')
-							.setLabel("Summary")
-							.setPlaceholder("A summary of the changes you would like to make.")
-							.setStyle(TextInputStyle.Paragraph);
+					const amendmentDetails1 = new TextInputBuilder()
+						.setCustomId('amendmentDetails1')
+						.setLabel("Details")
+						.setPlaceholder("The exact changes to the text.")
+						.setStyle(TextInputStyle.Paragraph);
+					
+					const amendmentDetails2 = new TextInputBuilder()
+						.setCustomId('amendmentDetails2')
+						.setLabel("Details (cont.)")
+						.setPlaceholder("Use this in case you hit the character limit on the box above. Leave this space blank if not needed.")
+						.setStyle(TextInputStyle.Paragraph)
+						.setRequired(false);
+					
+					const amendZeroRow = new ActionRowBuilder().addComponents(amendmentTitle);
+					const amendFirstRow = new ActionRowBuilder().addComponents(amendmentSummaryInput);
+					const amendSecondRow = new ActionRowBuilder().addComponents(amendmentDetails1);
+					const amendThirdRow = new ActionRowBuilder().addComponents(amendmentDetails2);
 
-						const amendmentDetails1 = new TextInputBuilder()
-							.setCustomId('amendmentDetails1')
-							.setLabel("Details")
-							.setPlaceholder("The exact changes to the text.")
-							.setStyle(TextInputStyle.Paragraph);
-						
-						const amendmentDetails2 = new TextInputBuilder()
-							.setCustomId('amendmentDetails2')
-							.setLabel("Details (cont.)")
-							.setPlaceholder("Use this in case you hit the character limit on the box above. Leave this space blank if not needed.")
-							.setStyle(TextInputStyle.Paragraph)
-							.setRequired(false);
-						
-						const amendZeroRow = new ActionRowBuilder().addComponents(amendmentTitle);
-						const amendFirstRow = new ActionRowBuilder().addComponents(amendmentSummaryInput);
-						const amendSecondRow = new ActionRowBuilder().addComponents(amendmentDetails1);
-						const amendThirdRow = new ActionRowBuilder().addComponents(amendmentDetails2);
+					// Add inputs to the modal
+					modal.addComponents(amendZeroRow, amendFirstRow, amendSecondRow, amendThirdRow);
 
-						// Add inputs to the modal
-						modal.addComponents(amendZeroRow, amendFirstRow, amendSecondRow, amendThirdRow);
+					// Show the modal to the user
+					await interaction.showModal(modal);
 
-						// Show the modal to the user
-						await interaction.showModal(modal);
+				// Check if the proposal is an application of membership or peerage
+				} else if (interaction.values[0] === "app_member" || interaction.values[0] === "app_peer") {
 
-                    // Check if the proposal is an application of membership or peerage
-                    } else if (interaction.values[0] === "app_member" || interaction.values[0] === "app_peer") {
+					// Make sure this is the Chair, because they are the only one who can make these kinds of proposals
+					if (interaction.member.roles.cache.has(chairId)) {
 
-						// Make sure this is the Chair, because they are the only one who can make these kinds of proposals
-						if (interaction.member.roles.cache.has(chairId)) {
-
-							// Now make the modal
-							const modal = new ModalBuilder()
-								.setCustomId(interaction.values[0])
-								.setTitle(dynTitle);
-
-							const applicationSubject = new TextInputBuilder()
-								.setCustomId("appSubject")
-								.setLabel("Subject")
-								.setPlaceholder("Username of the person you would like to promote.")
-								.setStyle(TextInputStyle.Short)
-								.setRequired(true)
-							
-							const appZeroRow = new ActionRowBuilder().addComponents(applicationSubject);
-							
-							modal.addComponents(appZeroRow);
-
-							await interaction.showModal(modal);
-						} else {
-							await interaction.reply("You are not the Chair!");
-						}
-                    } else if (interaction.values[0] === "inj_ip" || interaction.values[0] === "inj_rp" || interaction.values[0] === "inj_member") {
-						
 						// Now make the modal
 						const modal = new ModalBuilder()
 							.setCustomId(interaction.values[0])
 							.setTitle(dynTitle);
 
-						const injunctionSubject = new TextInputBuilder()
-							.setCustomId("injSubject")
+						const applicationSubject = new TextInputBuilder()
+							.setCustomId("appSubject")
 							.setLabel("Subject")
-							.setPlaceholder("Username of the person you would like to censure.")
+							.setPlaceholder("Username of the person you would like to promote.")
 							.setStyle(TextInputStyle.Short)
 							.setRequired(true)
 						
-						const injunctionDesc = new TextInputBuilder()
-							.setCustomId("injDesc")
-							.setLabel("Description of Incident")
-							.setPlaceholder("Give a detailed description of the offending behavior.")
-							.setStyle(TextInputStyle.Paragraph)
-							.setRequired(true)
-
-						const injunctionOutcome = new TextInputBuilder()
-							.setCustomId("injOut")
-							.setLabel("Preferential Outcome")
-							.setPlaceholder("How do you think the situation should be handled?")
-							.setStyle(TextInputStyle.Paragraph)
-							.setRequired(true)
+						const appZeroRow = new ActionRowBuilder().addComponents(applicationSubject);
 						
-						const appZeroRow = new ActionRowBuilder().addComponents(injunctionSubject);
-						const appFirstRow = new ActionRowBuilder().addComponents(injunctionDesc);
-						const appSecondRow = new ActionRowBuilder().addComponents(injunctionOutcome);
-						
-						modal.addComponents(appZeroRow, appFirstRow, appSecondRow);
+						modal.addComponents(appZeroRow);
 
 						await interaction.showModal(modal);
+					} else {
+						await interaction.reply("You are not the Chair!");
 					}
-				} else {
-					await interaction.reply({ content: "You have already submitted a proposal. Remove it with `/remove`, then do `/propose` again.", flags: MessageFlags.Ephemeral })
+				} else if (interaction.values[0] === "inj_ip" || interaction.values[0] === "inj_rp" || interaction.values[0] === "inj_member") {
+					
+					// Now make the modal
+					const modal = new ModalBuilder()
+						.setCustomId(interaction.values[0])
+						.setTitle(dynTitle);
+
+					const injunctionSubject = new TextInputBuilder()
+						.setCustomId("injSubject")
+						.setLabel("Subject")
+						.setPlaceholder("Username of the person you would like to censure.")
+						.setStyle(TextInputStyle.Short)
+						.setRequired(true)
+					
+					const injunctionDesc = new TextInputBuilder()
+						.setCustomId("injDesc")
+						.setLabel("Description of Incident")
+						.setPlaceholder("Give a detailed description of the offending behavior.")
+						.setStyle(TextInputStyle.Paragraph)
+						.setRequired(true)
+
+					const injunctionOutcome = new TextInputBuilder()
+						.setCustomId("injOut")
+						.setLabel("Preferential Outcome")
+						.setPlaceholder("How do you think the situation should be handled?")
+						.setStyle(TextInputStyle.Paragraph)
+						.setRequired(true)
+					
+					const appZeroRow = new ActionRowBuilder().addComponents(injunctionSubject);
+					const appFirstRow = new ActionRowBuilder().addComponents(injunctionDesc);
+					const appSecondRow = new ActionRowBuilder().addComponents(injunctionOutcome);
+					
+					modal.addComponents(appZeroRow, appFirstRow, appSecondRow);
+
+					await interaction.showModal(modal);
 				}
 			}
 		}
