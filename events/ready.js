@@ -2,6 +2,7 @@ const { Events } = require('discord.js');
 const { resChan, guildId } = require("../config.json");
 const cron = require("node-cron");
 const qman = require("../cogs/queue-manager.js");
+const dayjs = require('dayjs');
 
 module.exports = {
 	name: Events.ClientReady,
@@ -30,7 +31,7 @@ module.exports = {
 					let getResChan = client.channels.cache.get(resChan);
 					if (typeof getResChan !== "undefined") {
 						// Get the youngest item on the queue
-
+						let nextProp = qman.findNextProposal();
 						// Format the message and post it to the resolutions channel
 
 						
@@ -48,7 +49,7 @@ module.exports = {
 		}
 
 		cron.schedule('*/10 * * * * *', () => {
-			qman.findNextProposal();
+			queueLoop();
 		});
 
 	}

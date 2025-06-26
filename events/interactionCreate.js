@@ -33,7 +33,7 @@ module.exports = {
 				const propAsObj = {};
 
 				propAsObj.user  = interaction.member.id;
-				propAsObj.submitted = dayjs();
+				propAsObj.submitted = dayjs().unix();
 				propAsObj.kind = interaction.customId;
 				propAsObj.active = false;
 				propAsObj.votemsg = "0";
