@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, MessageFlags, TextDisplayBuilder } = require('discord.js');
-const { peerId } = require('../../config.json');
+const { peerId, guildId } = require('../../config.json');
 const qman = require("../../cogs/queue-manager.js");
 const kindtostr = require("../../cogs/kindtostr.js");
 const frm = require("../../cogs/formatter.js");
@@ -11,6 +11,7 @@ module.exports = {
 		.setDescription('Commands related to the management of the queue.')
 		.addStringOption(option =>
 			option.setName('action')
+                .setDescription("What do you want to do?")
 				.setRequired(true)
 				.addChoices(
 					{ name: 'Propose', value: 'q_propose' },
@@ -106,6 +107,8 @@ module.exports = {
             let qItems = qAsObj["queue"];
             let codeProposal = "";
 
+            const getServer = await interaction.client.guilds.fetch(guildId);
+
             if (qItems.length == 0) {
                 codeProposal = "The queue is empty.";
             } else {
@@ -114,9 +117,9 @@ module.exports = {
 
                     let item = qItems[i];
 
-                    const getUser = await interaction.client.users.fetch(item.user);
+                    const getUser = await getServer.members.fetch(item.user); // This gets the nickname rather than the username
 
-                    codeProposal += frm.formatHeader(item.kind, item.subject, getUser.globalName);
+                    codeProposal += frm.formatHeader(item.kind, item.subject, getUser.nickname, "PENDING");
                 }
 
 

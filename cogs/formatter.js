@@ -1,12 +1,12 @@
 const kindtostr = require("../cogs/kindtostr.js");
 
-function formatHeader(kind, subject, author) {
+function formatHeader(kind, subject, author, date) {
     let resClass= kindtostr.kindToStr(kind);
     let header = `\`\`\`ini
-[PEER RESOLUTION] PENDING\n
-CLASS: ${resClass}
-SUBJECT: ${subject}
-AUTHOR: ${author}
+[PEER RESOLUTION] ${date}\n
+    CLASS: ${resClass}
+  SUBJECT: ${subject}
+   AUTHOR: ${author}
 \`\`\``
     return header;
 }
@@ -22,23 +22,23 @@ function formatDetails(details) {
         let line = lineBy[i];
 
         if (line.search(/^[a-zA-Z0-9].+$/) != -1 && inCodeBlock === false) {
-            finalDetails += "`" + line + "`\n";
+            finalDetails += "> `" + line + "`\n";
         } else if (line.search(/^[a-zA-Z0-9].+$/) != -1 && inCodeBlock === true) {
-            finalDetails += "```\n"
+            finalDetails += "> ```\n"
             inCodeBlock = false;
-            finalDetails += "`" + line + "`\n";
+            finalDetails += "> `" + line + "`\n";
         } else if (line.search(/^[+|-].*/) != -1 && inCodeBlock === false) {
-            finalDetails += "```diff\n";
-            finalDetails += line + "\n";
+            finalDetails += "> ```diff\n";
+            finalDetails += "> " + line + "\n";
             inCodeBlock = true;
         } else if (line.search(/^[+|-].*/) != -1 && inCodeBlock === true) {
-            finalDetails += line + "\n";
+            finalDetails += "> " + line + "\n";
         }
 
     }
 
     if (inCodeBlock === true) {
-        finalDetails += "```";
+        finalDetails += "> ```";
     }
 
     return finalDetails;

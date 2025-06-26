@@ -1,13 +1,13 @@
 function kindToStr(elem) {
     switch(elem) {
         case "amd_admin":
-            return "Amendment of the Administrative Charter";
+            return "Amendment of Administrative Charter";
         case "amd_rp":
-            return "Amendment of the RP Charter";
+            return "Amendment of RP Charter";
         case "amd_format":
-            return "Amendment of the Formatting Guidelines";
+            return "Amendment of Formatting Guidelines";
         case "amd_community":
-            return "Amendment of the Community Guidelines";
+            return "Amendment of Community Guidelines";
         case "app_member":
             return "Application for Membership";
         case "app_peer":
