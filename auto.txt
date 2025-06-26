@@ -1,0 +1,22 @@
+		while (true) {
+			if(qman.findActive()) { // Y
+				console.log("Wee")
+
+			} else { // N
+				// Is anything in queue?
+				const qAsObj = qman.fetchQueue();
+
+				let qLen = qAsObj.length;
+
+				if (qLen > 0) {
+					// Start the first resolution in queue
+
+				} else {
+					// Zzzzzz....
+					console.log("Zzz...");
+					return new Promise(resolve => setTimeout(resolve, 1000));
+				}
+
+			}
+
+		}

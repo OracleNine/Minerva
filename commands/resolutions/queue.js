@@ -7,10 +7,9 @@ const dayjs = require('dayjs');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('queue')
-		.setDescription('Commands related to the queue.')
+		.setDescription('Commands related to the management of the queue.')
 		.addStringOption(option =>
 			option.setName('action')
-				.setDescription('What do you want to do?')
 				.setRequired(true)
 				.addChoices(
 					{ name: 'Propose', value: 'q_propose' },

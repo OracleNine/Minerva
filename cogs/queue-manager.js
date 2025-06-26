@@ -69,7 +69,7 @@ function findActive() {
 
     const result = qItems.filter((proposal) => proposal["active"] == true);
 
-    if (result != []) {
+    if (result.length > 0) {
         return true;
     } else {
         return false;
