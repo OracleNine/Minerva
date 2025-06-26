@@ -1,4 +1,7 @@
 const fs = require('node:fs');
+const dayjs = require('dayjs')
+let relativeTime = require("dayjs/plugin/relativeTime");
+dayjs.extend(relativeTime);
 // Each entry in the queue has the folowing properties
 // User: ID of the user who submitted the proposal
 // Kind: Classification of the proposal which determines the threshold
@@ -75,10 +78,23 @@ function findActive() {
         return false;
     }
 }
+function findNextProposal() {
+    let qAsObj = fetchQueue();
+    let qItems = qAsObj["queue"];
+    let dateArr = [];
+    for (let i = 0; i < qItems.length; i++) {
+        let item = qItems[i];
+        dateArr.push(item["submitted"]);
+    }
+
+    let comparison = dayjs(dateArr[0]).toNow(true);
+    console.log(comparison);
+}
 
 module.exports = {
     addToQueue,
     removeFrmQueue,
     fetchQueue,
-    findActive
+    findActive,
+    findNextProposal
 }

@@ -130,7 +130,7 @@ module.exports = {
 
                     let codeSubject = item.subject;
                     let codeAuthor = getUser.displayName;
-                    let codeDate = dayjs(item.date).format("YYYY-MM-DD");
+                    let codeDate = dayjs(item.submitted).format("YYYY-MM-DD");
 
                     let codeProposal = `
 \`\`\`ini

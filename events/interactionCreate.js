@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const qman = require("../cogs/queue-manager.js");
 const kindtostr = require("../cogs/kindtostr.js")
 const { peerId, chairId } = require("../config.json");
-const dayjs = require('dayjs')
+const dayjs = require('dayjs');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -33,10 +33,11 @@ module.exports = {
 				const propAsObj = {};
 
 				propAsObj.user  = interaction.member.id;
-				propAsObj.date = dayjs();
+				propAsObj.submitted = dayjs();
 				propAsObj.kind = interaction.customId;
 				propAsObj.active = false;
 				propAsObj.votemsg = "0";
+				propAsObj.startdate = "";
 				propAsObj.enddate = "";
 				propAsObj.eligiblevoters = [];
 
