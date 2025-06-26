@@ -47,12 +47,12 @@ module.exports = {
 					propAsObj.details = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
 				}
 				if (peerResolutionClasses.indexOf(interaction.customId[0]) == 4 || peerResolutionClasses.indexOf(interaction.customId[0]) == 5) {
-					propAsObj.subject = interaction.fields.getTextInputValue("appSubject")
+					propAsObj.subject = interaction.fields.getTextInputValue("appSubject");
 				}
 				if (peerResolutionClasses.indexOf(interaction.customId[0]) >= 6 && peerResolutionClasses.indexOf(interaction.customId[0]) <= 8) {
-					propAsObj.subject = interaction.fields.getTextInputValue("injSubject")
+					propAsObj.subject = interaction.fields.getTextInputValue("injSubject");
 					propAsObj.details = interaction.fields.getTextInputValue("injDesc");
-					propAsObj.desire = interaction.fields.getTextInputValue("injOut")
+					propAsObj.desire = interaction.fields.getTextInputValue("injOut");
 				}
 
 				let result = qman.addToQueue(propAsObj);

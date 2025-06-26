@@ -121,7 +121,15 @@ module.exports = {
 
 
             }
-            await interaction.reply({ content: codeProposal });
+
+            // Note to self this is how I'm going to send messages from now on
+            let finalQueueMsg = frm.truncateMsg(codeProposal);
+            await interaction.reply({ content: finalQueueMsg[0] });
+            if (finalQueueMsg.length > 1) {
+                for (let i = 1; i < finalQueueMsg.length; i++) {
+                    await interaction.followUp({ content: finalQueueMsg[i]})
+                }
+            }
         }
 	},
 };

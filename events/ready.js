@@ -1,9 +1,10 @@
-const { Events } = require('discord.js');
+const { Events, blockQuote, bold, italic, quote, spoiler, strikethrough, underline, subtext } = require('discord.js');
 const { resChan, guildId } = require("../config.json");
 const cron = require("node-cron");
 const qman = require("../cogs/queue-manager.js");
 const frm = require("../cogs/formatter.js");
 const dayjs = require('dayjs');
+const peerResolutionClasses = ["amd_admin", "amd_rp", "amd_format", "amd_community", "app_member", "app_peer", "inj_rp", "inj_ip", "inj_member"];
 
 module.exports = {
 	name: Events.ClientReady,
@@ -25,24 +26,33 @@ module.exports = {
 				} else { // NO
 					// Start the first resolution in the queue
 					
-					// Find the resolutions channel (make sure it exists)
-					let getResChan = client.channels.cache.get(resChan);
-					if (typeof getResChan !== "undefined") {
-						// Get the youngest item on the queue
-						let nextProp = qman.findNextProposal();
+					// Find the resolutions channel
+					const getChannel = await client.channels.fetch(resChan).catch(console.error);
+					// Get the youngest item on the queue
+					let nextProp = qman.findNextProposal();
 
-						// Format the message and post it to the resolutions channel
-						// First format the header
-						
-						const getAuthor = await client.users.fetch(nextProp.user);
-						let header = frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.globalName);
+					// Format the message and post it to the resolutions channel
+					// First format the header
+					
+					const getAuthor = await client.users.fetch(nextProp.user);
+					let header = frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.globalName);
 
-						// Gather a list of eligible peers and write it to the queue.json
-						// Post the vote-msg and add reactions
-						// Obtain the message ID of the vote msg and store it in queue.json
-					} else {
-						console.log("Can't find the resolutions channel. Double check the config.");
+					if (peerResolutionClasses.indexOf(nextProp.kind) >= 0 && peerResolutionClasses.indexOf(nextProp.kind) <= 3) {
+						// Summary of resolution
+						let summaryText = "**Summary of Resolution**\n"
+						summaryText += nextProp.summary;
+						// Details of Amendment
 					}
+					if (peerResolutionClasses.indexOf(nextProp.kind) == 4 || peerResolutionClasses.indexOf(nextProp.kind) == 5) {
+						
+					}
+					if (peerResolutionClasses.indexOf(nextProp.kind) >= 6 && peerResolutionClasses.indexOf(nextProp.kind) <= 8) {
+						
+					}
+
+					// Gather a list of eligible peers and write it to the queue.json
+					// Post the vote-msg and add reactions
+					// Obtain the message ID of the vote msg and store it in queue.json
 
 
 				}
