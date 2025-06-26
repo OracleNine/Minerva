@@ -2,21 +2,20 @@ const { Events } = require('discord.js');
 const { resChan, guildId } = require("../config.json");
 const cron = require("node-cron");
 const qman = require("../cogs/queue-manager.js");
+const frm = require("../cogs/formatter.js");
 const dayjs = require('dayjs');
 
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client) {
-		console.log(`Ready! Logged in as ${client.user.tag}`);
 
-		function queueLoop() {
+		async function queueLoop() {
 			// Is a resolution open?
 			if (qman.findActive()) { // YES
 				console.log("Yes, a resolution is open.");
 			} else { // NO
 				// Is the queue empty?
-				console.log("No, there is no open resolution.");
 				let qAsObj = qman.fetchQueue();
 				let qItems = qAsObj["queue"];
 
@@ -24,7 +23,6 @@ module.exports = {
 					console.log("The queue is empty.");
 					return;
 				} else { // NO
-					console.log("Queue is not empty, start another resolution...")
 					// Start the first resolution in the queue
 					
 					// Find the resolutions channel (make sure it exists)
@@ -32,9 +30,12 @@ module.exports = {
 					if (typeof getResChan !== "undefined") {
 						// Get the youngest item on the queue
 						let nextProp = qman.findNextProposal();
-						// Format the message and post it to the resolutions channel
 
+						// Format the message and post it to the resolutions channel
+						// First format the header
 						
+						const getAuthor = await client.users.fetch(nextProp.user);
+						let header = frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.globalName);
 
 						// Gather a list of eligible peers and write it to the queue.json
 						// Post the vote-msg and add reactions
@@ -48,6 +49,7 @@ module.exports = {
 			}
 		}
 
+		queueLoop();
 		cron.schedule('*/10 * * * * *', () => {
 			queueLoop();
 		});

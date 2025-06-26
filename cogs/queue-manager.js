@@ -86,10 +86,11 @@ function findNextProposal() {
         dateArr.push(submitDate);
     }
 
-    let oldest = Math.min(dateArr);
+    let oldest = Math.min.apply(Math, dateArr);
+
     const result = qItems.filter((proposal) => proposal["submitted"] == oldest);
 
-    return result;
+    return result[0];
 }
 
 module.exports = {

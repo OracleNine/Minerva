@@ -1,7 +1,8 @@
-const { SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, MessageFlags, ContainerBuilder } = require('discord.js');
+const { SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, MessageFlags, TextDisplayBuilder } = require('discord.js');
 const { peerId } = require('../../config.json');
 const qman = require("../../cogs/queue-manager.js");
 const kindtostr = require("../../cogs/kindtostr.js");
+const frm = require("../../cogs/formatter.js");
 const dayjs = require('dayjs');
 
 module.exports = {
@@ -101,53 +102,26 @@ module.exports = {
 
             // If the user wants to view something in the queue
 
-            let exampleContainer = new ContainerBuilder();
-
             let qAsObj = qman.fetchQueue();
             let qItems = qAsObj["queue"];
+            let codeProposal = "";
 
             if (qItems.length == 0) {
-                exampleContainer.addTextDisplayComponents(
-                    textDisplay => textDisplay
-                        .setContent("The queue is empty."),
-                );
+                codeProposal = "The queue is empty.";
             } else {
                 for (let i = 0; i < qItems.length; i++) {
-
-                    //	```ini
-                    //	[PEER RESOLUTION] <date YY-MM-DD : #>
-                    //
-                    //	CLASS: Application for Membership
-                    //	SUBJECT: <applicant>'s Applicancy
-                    //	AUTHOR: <chair>
-                    //	```
+                    // Iterate through each item in the queue and add it all to a TextDisplayComponent
 
                     let item = qItems[i];
 
-                    let codeClass = kindtostr.kindToStr(item.kind);
+                    const getUser = await interaction.client.users.fetch(item.user);
 
-                    const getUser = await interaction.client.users.cache.get(item.user);
-
-                    let codeSubject = item.subject;
-                    let codeAuthor = getUser.displayName;
-                    let codeDate = dayjs.unix(item.submitted).format("YYYY-MM-DD");
-
-                    let codeProposal = `
-\`\`\`ini
-[PEER RESOLUTION] ${codeDate}\n
-CLASS: ${codeClass}
-SUBJECT: ${codeSubject}
-AUTHOR: ${codeAuthor}
-\`\`\`
-`
-                    exampleContainer.addTextDisplayComponents(
-                        textDisplay => textDisplay
-                            .setContent(codeProposal),
-                    );
+                    codeProposal += frm.formatHeader(item.kind, item.subject, getUser.globalName);
                 }
 
+
             }
-            await interaction.reply({ components: [exampleContainer], flags: MessageFlags.IsComponentsV2});
+            await interaction.reply({ content: codeProposal });
         }
 	},
 };
