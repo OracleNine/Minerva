@@ -10,6 +10,7 @@ module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client) {
+		console.log(`Ready! Logged in as ${client.user.tag}`);
 
 		async function queueLoop() {
 			// Is a resolution open?
@@ -31,7 +32,8 @@ module.exports = {
 					// Get the youngest item on the queue
 					let nextProp = qman.findNextProposal();
 
-					// Format the message and post it to the resolutions channel
+					// Initialize the final message we will send to the channel
+					let finalMessage = "";
 					// First format the header
 					
 					const getAuthor = await client.users.fetch(nextProp.user);
@@ -42,6 +44,14 @@ module.exports = {
 						let summaryText = "**Summary of Resolution**\n"
 						summaryText += nextProp.summary;
 						// Details of Amendment
+						let detailsText = frm.formatDetails(nextProp.details);
+						
+						finalMessage += summaryText;
+						finalMessage += detailsText;
+
+						finalMessage = frm.truncateMsg(finalMessage);
+						
+
 					}
 					if (peerResolutionClasses.indexOf(nextProp.kind) == 4 || peerResolutionClasses.indexOf(nextProp.kind) == 5) {
 						

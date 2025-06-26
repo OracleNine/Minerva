@@ -87,7 +87,7 @@ module.exports = {
 					const amendmentDetails1 = new TextInputBuilder()
 						.setCustomId('amendmentDetails1')
 						.setLabel("Details")
-						.setPlaceholder("The exact changes to the text.")
+						.setPlaceholder("Write a + in front of lines you want to add, and a - in front of lines you want to remove.")
 						.setStyle(TextInputStyle.Paragraph);
 					
 					const amendmentDetails2 = new TextInputBuilder()
