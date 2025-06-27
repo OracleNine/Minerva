@@ -5,7 +5,6 @@ const qman = require("../cogs/queue-manager.js");
 const frm = require("../cogs/formatter.js");
 const kts = require("../cogs/kindtostr.js");
 const dayjs = require('dayjs');
-const peerResolutionClasses = ["amd_admin", "amd_rp", "amd_format", "amd_community", "app_member", "app_peer", "inj_rp", "inj_ip", "inj_member"];
 
 module.exports = {
 	name: Events.ClientReady,
@@ -35,45 +34,22 @@ module.exports = {
 					const getAuthor = await getServer.members.fetch(nextProp.user);
 
 					// Initialize the final message we will send to the channel
-					let finalMessage = "";
 					// First format the header
 					
 					const getNow = dayjs().format("YYYY-MM-DD");
 					let header = frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.nickname, getNow);
 
-					if (peerResolutionClasses.indexOf(nextProp.kind) >= 0 && peerResolutionClasses.indexOf(nextProp.kind) <= 3) {
-						// Summary of resolution
-						let summaryText = "> ### Summary of Resolution\n"
-						summaryText += frm.formatSummary(nextProp.summary)
-						finalMessage += summaryText;
 
-						// Details of Amendment
-						let detailsText = frm.formatDetails(nextProp.details);
-
-						finalMessage += "> ### Details of Amendment\n"
-						finalMessage += detailsText;
-					} else if (peerResolutionClasses.indexOf(nextProp.kind) == 4 || peerResolutionClasses.indexOf(nextProp.kind) == 5) {
-						
-					} else if (peerResolutionClasses.indexOf(nextProp.kind) >= 6 && peerResolutionClasses.indexOf(nextProp.kind) <= 8) {
-						let doi  = "> **Description of Incident**\n";
-						doi += frm.formatSummary(nextProp.details);
-						finalMessage += doi;
-
-						let prefOutcome = "\n> **Preferential Outcome**\n";
-						prefOutcome += frm.formatSummary(nextProp.desire);
-						finalMessage += prefOutcome;
-
-					}
 					// Post the vote-msg and add reactions
 					// For some godforsaken reason, the header needs to be sent separately or there will be a weird gap in the msg
 					await getChannel.send(`<@&${peerId}>\n` + header);
 
-					if (finalMessage != "") {
-						finalMessage = frm.truncateMsg(finalMessage);
-						for (let i = 0; i < finalMessage.length; i++) {
-							await getChannel.send(finalMessage[i]);
-						}
+					// Send the message to the channel here
+					let finalMessage = frm.generateResMsg(nextProp);
+					for (let i = 0; i < finalMessage.length; i++) {
+						await getChannel.send(finalMessage[i]);
 					}
+
 					// Set active to true for this proposal
 					nextProp["active"] = true;
 					nextProp["startdate"] = dayjs().unix()

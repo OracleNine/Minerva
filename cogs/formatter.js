@@ -1,4 +1,5 @@
 const kindtostr = require("../cogs/kindtostr.js");
+const peerResolutionClasses = ["amd_admin", "amd_rp", "amd_format", "amd_community", "app_member", "app_peer", "inj_rp", "inj_ip", "inj_member"];
 
 function formatHeader(kind, subject, author, date) {
     let resClass= kindtostr.kindToStr(kind);
@@ -13,7 +14,6 @@ function formatHeader(kind, subject, author, date) {
 function formatDetails(details) {
     // Put inline quotes around this ^[a-zA-Z0-9].+$
     // Put block quotes around the first and last occurrence of this ^[+|-].*
-
     let finalDetails = "";
     let lineBy = details.split("\n");
     let inCodeBlock = false;
@@ -42,10 +42,12 @@ function formatDetails(details) {
     }
 
     return finalDetails;
-}   
-function formatSummary(text) {
+}
+function formatSummary(text, title) {
     let finalSummary = "";
     let lineBy = text.split("\n");
+
+    finalSummary += "> ### " + title + "\n";
 
     for (let i = 0; i < lineBy.length; i++) {
         let line = lineBy[i];
@@ -54,28 +56,50 @@ function formatSummary(text) {
         }
     }
 
-    console.log(finalSummary);
     return finalSummary;
 
-}
+}  
 function truncateMsg(text) {
 
     // Text display components have a char limit of 4000. To avoid running into errors, this function splits up the message into 4000 char chunks
     // which is returned as an array. The bot can then iterate through that array until all parts of the message have been sent.
 
     text += "\n";
-    // Note to self, the message HAS to end with a \n, otherwise it will not get truncated properly due to how the regex is parsed.
-    // Yes, it's stupid but this is the easiest solution that I can think of.
 
-    let txtArr = text.match(/[\S\s]{1,2000}\n/g);
+    let txtArr = text.match(/[\S\s]{1,1800}[\.|\n|\?|\!]/g);
 
     return txtArr;
 
+}
+function generateResMsg(proposal) {
+    let ffResTxt = [];
+    if (peerResolutionClasses.indexOf(proposal.kind) >= 0 && peerResolutionClasses.indexOf(proposal.kind) <= 3) {
+        // Summary
+        let formatted = formatSummary(proposal.summary, "Summary of Resolution")
+        let truncSummary = truncateMsg(formatted);
+        for (let i = 0; i < truncSummary.length; i++) {
+            ffResTxt.push(truncSummary[i]);
+        }
+        // Details
+        let truncDetails = truncateMsg(proposal.details);
+        for (let i = 0; i < truncDetails.length; i++) {
+            let detailsFormatted = "";
+            if (i === 0) {
+                detailsFormatted += "> ### Details of Resolution\n";
+            }
+            detailsFormatted += formatDetails(truncDetails[i])
+            ffResTxt.push(detailsFormatted);
+        }
+    } else if (peerResolutionClasses.indexOf(proposal.kind) >= 6 && peerResolutionClasses.indexOf(proposal.kind) <= 8) {
+        
+    }
+
+    return ffResTxt;
 }
 
 module.exports = {
     formatHeader, 
     truncateMsg,
     formatDetails,
-    formatSummary
+    generateResMsg
 }
