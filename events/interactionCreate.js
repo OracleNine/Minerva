@@ -45,11 +45,9 @@ module.exports = {
 					propAsObj.subject = interaction.fields.getTextInputValue("amendmentTitle");
 					propAsObj.summary = interaction.fields.getTextInputValue("amendmentSummary");
 					propAsObj.details = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
-				}
-				if (peerResolutionClasses.indexOf(interaction.customId) == 4 || peerResolutionClasses.indexOf(interaction.customId) == 5) {
+				} else if (peerResolutionClasses.indexOf(interaction.customId) == 4 || peerResolutionClasses.indexOf(interaction.customId) == 5) {
 					propAsObj.subject = interaction.fields.getTextInputValue("appSubject");
-				}
-				if (peerResolutionClasses.indexOf(interaction.customId) >= 6 && peerResolutionClasses.indexOf(interaction.customId) <= 8) {
+				} else if (peerResolutionClasses.indexOf(interaction.customId) >= 6 && peerResolutionClasses.indexOf(interaction.customId) <= 8) {
 					propAsObj.subject = interaction.fields.getTextInputValue("injSubject");
 					propAsObj.details = interaction.fields.getTextInputValue("injDesc");
 					propAsObj.desire = interaction.fields.getTextInputValue("injOut");

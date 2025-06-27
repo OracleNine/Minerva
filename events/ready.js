@@ -39,30 +39,29 @@ module.exports = {
 					// First format the header
 					
 					const getNow = dayjs().format("YYYY-MM-DD");
-					finalMessage += frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.nickname, getNow);
+					let header = frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.nickname, getNow);
 
 					if (peerResolutionClasses.indexOf(nextProp.kind) >= 0 && peerResolutionClasses.indexOf(nextProp.kind) <= 3) {
 						// Summary of resolution
-						let summaryText = "> " + "### Summary of Resolution\n";
-						summaryText += "> " + nextProp.summary;
-						
+						let summaryText = "> ### Summary of Resolution\n"
+						summaryText += frm.formatSummary(nextProp.summary)
+						finalMessage += summaryText;
+
 						// Details of Amendment
 						let detailsText = frm.formatDetails(nextProp.details);
-						
-						finalMessage += summaryText + "\n";
 
 						finalMessage += "> ### Details of Amendment\n"
 						finalMessage += detailsText;
-					}
-					if (peerResolutionClasses.indexOf(nextProp.kind) == 4 || peerResolutionClasses.indexOf(nextProp.kind) == 5) {
+					} else if (peerResolutionClasses.indexOf(nextProp.kind) == 4 || peerResolutionClasses.indexOf(nextProp.kind) == 5) {
 						
-					}
-					if (peerResolutionClasses.indexOf(nextProp.kind) >= 6 && peerResolutionClasses.indexOf(nextProp.kind) <= 8) {
-						finalMessage = "> **Description of Incident**\n";
-						finalMessage += "> " + nextProp.details;
+					} else if (peerResolutionClasses.indexOf(nextProp.kind) >= 6 && peerResolutionClasses.indexOf(nextProp.kind) <= 8) {
+						let doi  = "> **Description of Incident**\n";
+						doi += frm.formatSummary(nextProp.details);
+						finalMessage += doi;
 
-						finalMessage += "\n> **Preferential Outcome**\n"
-						finalMessage += "> " + nextProp.desire;
+						let prefOutcome = "\n> **Preferential Outcome**\n";
+						prefOutcome += frm.formatSummary(nextProp.desire);
+						finalMessage += prefOutcome;
 
 					}
 					// Post the vote-msg and add reactions

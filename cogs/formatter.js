@@ -17,7 +17,7 @@ function formatDetails(details) {
     let finalDetails = "";
     let lineBy = details.split("\n");
     let inCodeBlock = false;
-    let finalLine = lineBy.length - 1;
+
     for (let i = 0; i < lineBy.length; i++) {
         let line = lineBy[i];
 
@@ -43,6 +43,21 @@ function formatDetails(details) {
 
     return finalDetails;
 }   
+function formatSummary(text) {
+    let finalSummary = "";
+    let lineBy = text.split("\n");
+
+    for (let i = 0; i < lineBy.length; i++) {
+        let line = lineBy[i];
+        if (line != "") {
+            finalSummary += "> " + line + "\n";
+        }
+    }
+
+    console.log(finalSummary);
+    return finalSummary;
+
+}
 function truncateMsg(text) {
 
     // Text display components have a char limit of 4000. To avoid running into errors, this function splits up the message into 4000 char chunks
@@ -61,5 +76,6 @@ function truncateMsg(text) {
 module.exports = {
     formatHeader, 
     truncateMsg,
-    formatDetails
+    formatDetails,
+    formatSummary
 }
