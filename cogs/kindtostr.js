@@ -20,7 +20,30 @@ function kindToStr(elem) {
             return "Injunction on User Behavior";
     }
 }
+function determineThreshold(elem) {
+    switch(elem) {
+        case "amd_admin":
+            return 2/3;
+        case "amd_rp":
+            return 2/3;
+        case "amd_format":
+            return 2/3;
+        case "amd_community":
+            return 2/3;
+        case "app_member":
+            return 1/2;
+        case "app_peer":
+            return 1/2;
+        case "inj_ip":
+            return 1/2;
+        case "inj_rp":
+            return 1/2;
+        case "inj_member":
+            return 1/2;
+    }
+}
 
 module.exports = {
-    kindToStr
+    kindToStr,
+    determineThreshold
 }

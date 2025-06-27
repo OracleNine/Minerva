@@ -96,8 +96,8 @@ module.exports = {
 
             // If the user wants to remove something from the queue
 
-            qman.removeFrmQueue(interaction.member.id);
-            await interaction.reply({ content: "Your proposals, if any, have been removed from the queue.", flags: MessageFlags.Ephemeral });
+            let result = qman.removeFrmQueue(interaction.member.id);
+            await interaction.reply({ content: result, flags: MessageFlags.Ephemeral });
 
         } else if (category == "q_view") {
 
@@ -116,9 +116,7 @@ module.exports = {
                     // Iterate through each item in the queue and add it all to a TextDisplayComponent
 
                     let item = qItems[i];
-
                     const getUser = await getServer.members.fetch(item.user); // This gets the nickname rather than the username
-
                     codeProposal += frm.formatHeader(item.kind, item.subject, getUser.nickname, "PENDING");
                 }
 

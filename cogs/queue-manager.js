@@ -42,25 +42,34 @@ function addToQueue(element) {
         console.error(error);
     }
 
-    return "Your proposal has been successfully added to the queue. You can see all items in the queue with `/showqueue`.";
+    return "Your proposal has been successfully added to the queue. You can see all items in the queue with `/queue view`.";
 }
 function removeFrmQueue(user) {
     // Need to make sure the queue exists and then store it as an object
     let qAsObj = fetchQueue();
     let qItems = qAsObj["queue"]
 
-    // Find and filter out the proposal submitted by the user
-    const result = qItems.filter((proposal) => proposal["user"] != user);
+    const isActive = qItems.filter((proposal) => proposal["user"] == user)
+    if (isActive.length > 0) {
+        if (isActive[0].active === true) {
+            return "You cannot remove an active item from the queue."
+        } else {
+            const result = qItems.filter((proposal) => proposal["user"] != user)
+            const newQObj = {
+                "queue": result
+            }
+            let qAsStr = JSON.stringify(newQObj);
 
-    const newQObj = {
-        "queue": result
-    }
-    let qAsStr = JSON.stringify(newQObj);
+            try {
+                fs.writeFileSync("./queue.json", qAsStr);
+            } catch (err) {
+                console.error(err);
+            }
 
-    try {
-        fs.writeFileSync("./queue.json", qAsStr);
-    } catch (err) {
-        console.error(err);
+            return "Your proposal has been removed.";
+        }
+    } else {
+        return "You have no proposals in the queue.";
     }
 }
 function findActive() {

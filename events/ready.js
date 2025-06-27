@@ -1,8 +1,9 @@
 const { Events, blockQuote, bold, italic, quote, spoiler, strikethrough, underline, subtext } = require('discord.js');
-const { resChan, guildId, peerId } = require("../config.json");
+const { resChan, guildId, peerId, yes, no, abstain } = require("../config.json");
 const cron = require("node-cron");
 const qman = require("../cogs/queue-manager.js");
 const frm = require("../cogs/formatter.js");
+const kts = require("../cogs/kindtostr.js");
 const dayjs = require('dayjs');
 const peerResolutionClasses = ["amd_admin", "amd_rp", "amd_format", "amd_community", "app_member", "app_peer", "inj_rp", "inj_ip", "inj_member"];
 
@@ -38,12 +39,13 @@ module.exports = {
 					// First format the header
 					
 					const getNow = dayjs().format("YYYY-MM-DD");
-					let header = frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.nickname, getNow);
+					finalMessage += frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.nickname, getNow);
 
 					if (peerResolutionClasses.indexOf(nextProp.kind) >= 0 && peerResolutionClasses.indexOf(nextProp.kind) <= 3) {
 						// Summary of resolution
 						let summaryText = "> " + "### Summary of Resolution\n";
 						summaryText += "> " + nextProp.summary;
+						
 						// Details of Amendment
 						let detailsText = frm.formatDetails(nextProp.details);
 						
@@ -51,53 +53,65 @@ module.exports = {
 
 						finalMessage += "> ### Details of Amendment\n"
 						finalMessage += detailsText;
-
-						finalMessage = frm.truncateMsg(finalMessage);
-						
-
 					}
 					if (peerResolutionClasses.indexOf(nextProp.kind) == 4 || peerResolutionClasses.indexOf(nextProp.kind) == 5) {
 						
 					}
 					if (peerResolutionClasses.indexOf(nextProp.kind) >= 6 && peerResolutionClasses.indexOf(nextProp.kind) <= 8) {
-						let descText = "> **Description of Incident**\n";
-						descText += "> " + nextProp.details;
+						finalMessage = "> **Description of Incident**\n";
+						finalMessage += "> " + nextProp.details;
 
-						descText += "\n> **Preferential Outcome**\n"
-						descText += "> " + nextProp.desire;
-
-						finalMessage = frm.truncateMsg(descText);
+						finalMessage += "\n> **Preferential Outcome**\n"
+						finalMessage += "> " + nextProp.desire;
 
 					}
 					// Post the vote-msg and add reactions
 					// For some godforsaken reason, the header needs to be sent separately or there will be a weird gap in the msg
-					await getChannel.send(header);
-					for (let i = 0; i < finalMessage.length; i++) {
-						await getChannel.send(finalMessage[i]);
+					await getChannel.send(`<@&${peerId}>\n` + header);
+
+					if (finalMessage != "") {
+						finalMessage = frm.truncateMsg(finalMessage);
+						for (let i = 0; i < finalMessage.length; i++) {
+							await getChannel.send(finalMessage[i]);
+						}
 					}
 					// Set active to true for this proposal
 					nextProp["active"] = true;
+					nextProp["startdate"] = dayjs().unix()
 
 					// Obtain a list of eligible peers and save them to the proposal object
 					let eligible = getServer.roles.cache.get(peerId).members.map(m=>m.user.id);
 					nextProp["eligiblevoters"] = eligible;
 
-					// Obtain the message ID of the vote message
+					let threshold = kts.determineThreshold(nextProp.kind);
+					if (threshold === 2/3) {
+						threshold = "2/3";
+					} else if (threshold === 1/2) {
+						threshold = "1/2 + ε";
+					}
+					// Send the vote message. Obtain its ID and save it to the proposal object
 					voteTxt = `\`\`\`
-THRESHOLD: 2/3
+THRESHOLD: ${threshold}
 \`\`\`
-:white_check_mark: \`YES\`   |   :x: \`NO\`   |   :heavy_minus_sign: \`ABSTAIN\``
-					await getChannel.send(voteTxt);
-					// Update the queue
+<:yes:${yes}> \`YES\`   |   <:no:${no}> \`NO\`   |   <:abstain:${abstain}> \`ABSTAIN\``
+					const sendVote = await getChannel.send(voteTxt);
+					nextProp["votemsg"] = sendVote.id;
+					sendVote.react(yes)
+						.then(() => sendVote.react(no))
+						.then(() => sendVote.react(abstain))
+						.catch(error => console.error(error));
 
+					// Update the queue
+					qman.removeFrmQueue(nextProp.user);
+					qman.addToQueue(nextProp);
+					
 
 				}
 			}
 		}
 
-		//queueLoop();
 		cron.schedule('*/10 * * * * *', () => {
-			//queueLoop();
+			queueLoop();
 		});
 
 	}

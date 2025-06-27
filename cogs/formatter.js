@@ -44,11 +44,15 @@ function formatDetails(details) {
     return finalDetails;
 }   
 function truncateMsg(text) {
+
     // Text display components have a char limit of 4000. To avoid running into errors, this function splits up the message into 4000 char chunks
     // which is returned as an array. The bot can then iterate through that array until all parts of the message have been sent.
-    // Probably a better way to do this, but I don't really care.
 
-    let txtArr = text.match(/[\S\s]{1,4000}/g);
+    text += "\n";
+    // Note to self, the message HAS to end with a \n, otherwise it will not get truncated properly due to how the regex is parsed.
+    // Yes, it's stupid but this is the easiest solution that I can think of.
+
+    let txtArr = text.match(/[\S\s]{1,2000}\n/g);
 
     return txtArr;
 
