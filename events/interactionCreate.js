@@ -27,8 +27,8 @@ module.exports = {
 		} else if (interaction.isModalSubmit()) {
 
 			const peerResolutionClasses = ["amd_admin", "amd_rp", "amd_format", "amd_community", "app_member", "app_peer", "inj_rp", "inj_ip", "inj_member"];
-			// if the modal submission corresponds to an amendment, get those values
 			if (peerResolutionClasses.indexOf(interaction.customId) !== -1) {
+				// Make sure the modal is one of the peer resolution classes
 
 				const propAsObj = {};
 
