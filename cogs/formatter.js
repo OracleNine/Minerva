@@ -125,6 +125,15 @@ function generateResMsg(proposal) {
     }
     return ffResTxt;
 }
+function sortVoters(a,b) {
+    if (a.name < b.name) {
+        return -1;
+    } else if (a.name > b.name) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
 function formatTally(eligiblePeers, currentDate) {
     let tallyHeader = `\`\`\`ini
 [PEER RESOLUTION] ${currentDate}
@@ -134,6 +143,7 @@ function formatTally(eligiblePeers, currentDate) {
     let votedYes = 0;
     let votedNo = 0;
     let votedAbstain = 0;
+    eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
     for (let i = 0; i < eligiblePeers.length; i++) {
         tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + eligiblePeers[i].name + `\`\n`;
         if (eligiblePeers[i].voter_state === 1) {
@@ -165,6 +175,7 @@ FINAL TALLY
     let votedYes = 0;
     let votedNo = 0;
     let votedAbstain = 0;
+    eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
     for (let i = 0; i < eligiblePeers.length; i++) {
         tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + eligiblePeers[i].name + `\`\n`;
         if (eligiblePeers[i].voter_state === 1) {
