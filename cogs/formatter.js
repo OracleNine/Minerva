@@ -158,9 +158,6 @@ function formatTally(eligiblePeers, currentDate) {
       YES: ${votedYes}
        NO: ${votedNo}
   ABSTAIN: ${votedAbstain}
-\`\`\`
-\`\`\`
-   RESULT: PENDING
 \`\`\``
 
     let tallyMsg = tallyHeader + tallyBody + tallyFooter;

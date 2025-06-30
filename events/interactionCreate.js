@@ -183,7 +183,7 @@ module.exports = {
 						if (thisPeer.length > 0) {
 							thisPeer = thisPeer[0];
 							let withoutThisPeer = eligibleVoters.filter((voter) => voter["id"] !== interaction.member.id); // get every eligible voter object except for this member
-							let newVoterState = kindtostr.determineVoterState(interaction.customId)
+							let newVoterState = kindtostr.determineVoterState(interaction.customId);
 							thisPeer["voter_state"] = newVoterState;
 							withoutThisPeer.push(thisPeer);
 							qman.changeProperty(activeResolution.user, "eligiblevoters", withoutThisPeer);
