@@ -125,43 +125,11 @@ function generateResMsg(proposal) {
     }
     return ffResTxt;
 }
-function translateVotes (yesVotes, noVotes, abstainVotes){
-
-    let elVoters = [];
-
-    for (let i = 0; i < yesVotes.length; i++) {
-        elVoters.push({
-            "id": yesVotes[i],
-            "voter_state": 1
-        })
-    }
-
-    for (let i = 0; i < noVotes.length; i++) {
-        elVoters.push({
-            "id": noVotes[i],
-            "voter_state": 2
-        })
-    }
-
-    for (let i = 0; i < abstainVotes.length; i++) {
-        elVoters.push({
-            "id": abstainVotes[i],
-            "voter_state": 3
-        })
-    }
-
-    return elVoters;
-}
-function voterDelta(before, after) {
-
-}
 
 module.exports = {
     formatHeader, 
     truncateMsg,
     formatDetails,
     generateResMsg,
-    snip,
-    translateVotes,
-    voterDelta
+    snip
 }

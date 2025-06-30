@@ -101,11 +101,33 @@ function findNextProposal() {
 
     return result[0];
 }
+function changeProperty(user, property, value) {
+    let qAsObj = fetchQueue();
+    let qItems = qAsObj["queue"];
+    let targetItem = qItems.filter((proposal) => proposal["user"] === user);
+    let without = qItems.filter((proposal) => proposal["user"] !== user); // Every item in the queue except our target
+
+    if (targetItem.length > 0) {
+        let itemToChange = targetItem[0];
+        try {
+            itemToChange[property] = value;
+            without.push(itemToChange);
+            const newQObj = {
+                "queue": without
+            }
+            let qAsStr = JSON.stringify(newQObj);
+            fs.writeFileSync("./queue.json", qAsStr);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+}
 
 module.exports = {
     addToQueue,
     removeFrmQueue,
     fetchQueue,
     findActive,
-    findNextProposal
+    findNextProposal,
+    changeProperty
 }

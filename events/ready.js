@@ -1,5 +1,5 @@
-const { Events, blockQuote, bold, italic, quote, spoiler, strikethrough, underline, subtext } = require('discord.js');
-const { resChan, guildId, peerId, yes, no, abstain, clientId } = require("../config.json");
+const { Events, ButtonBuilder, ActionRowBuilder, ButtonStyle, SeparatorBuilder, SeparatorSpacingSize, MessageFlags } = require('discord.js');
+const { resChan, guildId, peerId, yes, no, abstain, clientId, } = require("../config.json");
 const cron = require("node-cron");
 const qman = require("../cogs/queue-manager.js");
 const frm = require("../cogs/formatter.js");
@@ -16,8 +16,10 @@ module.exports = {
 		const getServer = await client.guilds.fetch(guildId).catch(console.error);
 		const getChannel = await getServer.channels.fetch(resChan).catch(console.error);
 
-		async function closeRes() {
-
+		async function closeResolution(activeResolution) {	
+			// Have all eligible users voted?
+			let voteMsgId = activeResolution["votemsg"];
+			let eligibleVoters = activeResolution["eligiblevoters"];
 		}
 
 		async function queueLoop() {
@@ -25,35 +27,30 @@ module.exports = {
 			let activeResolution = qman.findActive();
 			if (activeResolution.length > 0) { // YES
 				activeResolution = activeResolution[0];
-				// Have three days passed?
+				// Has 72 hours passed?
 				if (activeResolution["enddate"] <= dayjs().unix()) {// YES
-					
+					closeResolution(activeResolution);
 				} else { // NO
-					let voteMsgId = activeResolution["votemsg"];
-					const voteMsgObj = await getChannel.messages.fetch(voteMsgId);
+					let eligibleVoters = activeResolution["eligiblevoters"];
+					let allVotersVoted = true;
 
-					// Obtain an array of user IDs who voted "yes"
-					const yesRxn = await voteMsgObj.reactions.cache.find(reaction => reaction._emoji.id === yes);
-					let yesUsers = await yesRxn.users.fetch();
-					yesUsers = yesUsers.map(m => m.id);
-					yesUsers = frm.snip(yesUsers, clientId);
-					// You wouldnt believe how difficult this was to figure out
-					// Obtain an array of user IDs who voted "no"
-					const noRxn = await voteMsgObj.reactions.cache.find(reaction => reaction._emoji.id === no);
-					let noUsers = await noRxn.users.fetch();
-					noUsers = noUsers.map(m => m.id);
-					noUsers = frm.snip(noUsers, clientId);
-					// Obtain an array of user IDs who voted "abstain"
-					const abstainRxn = await voteMsgObj.reactions.cache.find(reaction => reaction._emoji.id === no);
-					let abstainUsers = await abstainRxn.users.fetch();
-					abstainUsers = abstainUsers.map(m => m.id);
-					abstainUsers = frm.snip(abstainUsers, clientId);
+					// Iterate through all eligible voters and make sure its not 0 (absent) for anyone
+					for (let i = 0; i < eligibleVoters.length; i++) {
+						let voter = eligibleVoters[i];
+						let state = voter.voter_state;
 
-					afterVoters = frm.translateVotes(yesUsers, noUsers, abstainUsers);
-					console.log(afterVoters);
+						if (state == 0) {
+							allVotersVoted = false;
+						}
+					}
+					// Have all eligible peers voted?
+					if (allVotersVoted) { // YES
+						console.log("Everyone has voted");
+					} else { // NO
+						console.log("Not everyone has voted");
+					}
 					
 				}	
-
 			} else { // NO
 				// Is the queue empty?
 				let qAsObj = qman.fetchQueue();
@@ -85,12 +82,6 @@ module.exports = {
 								await getChannel.send(finalMessage[i]);
 							}
 						}
-						// Set active to true for this proposal
-						let today = dayjs();
-
-						nextProp["active"] = true;
-						nextProp["startdate"] = today.unix();
-						nextProp["enddate"] = today.add(3, "day").unix();
 
 						// Obtain a list of eligible peers and save them to the proposal object
 						let listPeers = getServer.roles.cache.get(peerId).members.map(m=>m.user.id);
@@ -104,9 +95,6 @@ module.exports = {
 							elPeersArr.push(usrObj);
 						}
 
-						console.log(elPeersArr);
-						nextProp["eligiblevoters"] = elPeersArr;
-
 						let threshold = kts.determineThreshold(nextProp.kind);
 						if (threshold === 2/3) {
 							threshold = "2/3";
@@ -114,20 +102,44 @@ module.exports = {
 							threshold = "1/2 + ε";
 						}
 					// Send the vote message. Obtain its ID and save it to the proposal object
-						voteTxt = `\`\`\`
-THRESHOLD: ${threshold}
-\`\`\`
-<:yes:${yes}> \`YES\`   |   <:no:${no}> \`NO\`   |   <:abstain:${abstain}> \`ABSTAIN\``
-						const sendVote = await getChannel.send(voteTxt);
-						nextProp["votemsg"] = sendVote.id;
-						sendVote.react(yes)
-							.then(() => sendVote.react(no))
-							.then(() => sendVote.react(abstain))
-							.catch(error => console.error(error));
 
-						// Update the queue
-						qman.removeFrmQueue(nextProp.user);
-						qman.addToQueue(nextProp);
+						const yesButton = new ButtonBuilder()
+							.setCustomId("vote_yes")
+							.setEmoji(`<:yes:${yes}>`)
+							.setLabel(`YES`)
+							.setStyle(ButtonStyle.Secondary);
+						
+						const noButton = new ButtonBuilder()
+							.setCustomId("vote_no")
+							.setEmoji(`<:no:${no}>`)
+							.setLabel(`NO`)
+							.setStyle(ButtonStyle.Secondary);
+						
+						const abstainButton = new ButtonBuilder()
+							.setCustomId("vote_abstain")
+							.setEmoji(`<:abstain:${abstain}>`)
+							.setLabel(`ABSTAIN`)
+							.setStyle(ButtonStyle.Secondary);
+
+						const vote_row = new ActionRowBuilder()
+							.addComponents(yesButton, noButton, abstainButton);
+
+						const sendVote = await getChannel.send({
+							content: `\`\`\`
+THRESHOLD: ${threshold}
+\`\`\``,
+							components: [vote_row]
+						});
+
+												// Set active to true for this proposal
+						let today = dayjs();
+
+						qman.changeProperty(nextProp.user, "active", true);
+						qman.changeProperty(nextProp.user, "startdate", today.unix());
+						const deadline = today.add(3, "day").unix();
+						qman.changeProperty(nextProp.user, "enddate", deadline);
+						qman.changeProperty(nextProp.user, "votemsg", sendVote.id);
+						qman.changeProperty(nextProp.user, "eligiblevoters", elPeersArr);
 
 					} catch(err) {
 						console.error("Could not post resolution, removing it from the queue..." + err);

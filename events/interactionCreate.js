@@ -2,7 +2,7 @@ const { Events, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle, Ac
 const fs = require('node:fs');
 const qman = require("../cogs/queue-manager.js");
 const kindtostr = require("../cogs/kindtostr.js")
-const { peerId, chairId } = require("../config.json");
+const { peerId, chairId, guildId, resChan } = require("../config.json");
 const dayjs = require('dayjs');
 
 module.exports = {
@@ -167,6 +167,25 @@ module.exports = {
 					modal.addComponents(appZeroRow, appFirstRow, appSecondRow);
 
 					await interaction.showModal(modal);
+				}
+			}
+		} else if (interaction.isButton()) {
+			if (interaction.customId === "vote_yes" || interaction.customId === "vote_no" || interaction.customId === "vote_abstain") {
+				let activeResolution = qman.findActive();
+				if (activeResolution.length > 0) {
+					activeResolution = activeResolution[0];
+					let voteMsgId = activeResolution["votemsg"];
+					if (interaction.message.id === voteMsgId) { 
+						let eligibleVoters = activeResolution["eligiblevoters"];
+						let withoutThisPeer = eligibleVoters.filter((voter) => voter["id"] !== interaction.member.id); // get every eligible voter object except for this member
+						const updateVoterObj = {
+							"id": interaction.member.id,
+							"voter_state": kindtostr.determineVoterState(interaction.customId)
+						}
+						withoutThisPeer.push(updateVoterObj);
+
+						qman.changeProperty(activeResolution.user, "eligiblevoters", withoutThisPeer);
+					}
 				}
 			}
 		}

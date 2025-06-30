@@ -42,8 +42,21 @@ function determineThreshold(elem) {
             return 1/2;
     }
 }
+function determineVoterState(elem) {
+    switch(elem) {
+        case "vote_yes":
+            return 1;
+        case "vote_no":
+            return 2
+        case "vote_abstain":
+            return 3;
+        case "vote_absent":
+            return 0;
+    }
+}
 
 module.exports = {
     kindToStr,
-    determineThreshold
+    determineThreshold,
+    determineVoterState
 }
