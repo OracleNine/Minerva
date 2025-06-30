@@ -1,3 +1,5 @@
+const { yes, no, abstain } = require("../config.json");
+
 function kindToStr(elem) {
     switch(elem) {
         case "amd_admin":
@@ -52,6 +54,12 @@ function determineVoterState(elem) {
             return 3;
         case "vote_absent":
             return 0;
+        case 1:
+            return `<:yes:${yes}>`;
+        case 2:
+            return `<:no:${no}>`;
+        case 3:
+            return `<:abstain:${abstain}>`
     }
 }
 

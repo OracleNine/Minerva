@@ -82,8 +82,7 @@ module.exports = {
 							}
 						}
 
-						// Obtain a list of eligible peers and save them to the proposal object
-
+						// Obtain a list of current peers and save them to the proposal object
 						let peerRole = await getServer.members.fetch();
 						let listPeers = peerRole.filter(m => {
 							return m.roles.cache.hasAny(peerId) === true;

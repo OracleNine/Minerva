@@ -80,7 +80,8 @@ module.exports = {
 						.setCustomId('amendmentSummary')
 						.setLabel("Summary")
 						.setPlaceholder("A summary of the changes you would like to make.")
-						.setStyle(TextInputStyle.Paragraph);
+						.setStyle(TextInputStyle.Paragraph)
+						.setMaxLength(650);
 
 					const amendmentDetails1 = new TextInputBuilder()
 						.setCustomId('amendmentDetails1')
@@ -178,14 +179,20 @@ module.exports = {
 					if (interaction.message.id === voteMsgId) { 
 						let eligibleVoters = activeResolution["eligiblevoters"];
 						let withoutThisPeer = eligibleVoters.filter((voter) => voter["id"] !== interaction.member.id); // get every eligible voter object except for this member
+						let newVoterState = kindtostr.determineVoterState(interaction.customId)
 						const updateVoterObj = {
 							"id": interaction.member.id,
-							"voter_state": kindtostr.determineVoterState(interaction.customId)
+							"voter_state": newVoterState
 						}
 						withoutThisPeer.push(updateVoterObj);
-
+						let getEmoji = kindtostr.determineVoterState(newVoterState);
 						qman.changeProperty(activeResolution.user, "eligiblevoters", withoutThisPeer);
+						await interaction.reply({ content: `You have voted ${getEmoji}.`, flags: MessageFlags.Ephemeral});
+					} else {
+						await interaction.reply({ content: "That vote is no longer active.", flags: MessageFlags.Ephemeral});
 					}
+				} else {
+					await interaction.reply({ content: "That vote is no longer active.", flags: MessageFlags.Ephemeral});
 				}
 			}
 		}
