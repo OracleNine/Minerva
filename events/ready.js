@@ -72,7 +72,6 @@ module.exports = {
 
 
 						// Post the vote-msg and add reactions
-						// For some godforsaken reason, the header needs to be sent separately or there will be a weird gap in the msg
 						await getChannel.send(`<@&${peerId}>\n` + header);
 
 						// Send the message to the channel here
@@ -84,7 +83,14 @@ module.exports = {
 						}
 
 						// Obtain a list of eligible peers and save them to the proposal object
-						let listPeers = getServer.roles.cache.get(peerId).members.map(m=>m.user.id);
+
+						let peerRole = await getServer.members.fetch();
+						let listPeers = peerRole.filter(m => {
+							return m.roles.cache.hasAny(peerId) === true;
+						});
+						listPeers = listPeers.map(m=>m.user.id);
+						// Figuring this out was possibly the most painful 2 hours of my life
+
 						let elPeersArr = [];
 
 						for (let i = 0; i < listPeers.length; i++) {
