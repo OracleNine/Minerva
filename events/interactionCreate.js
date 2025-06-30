@@ -1,6 +1,7 @@
 const { Events, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
 const fs = require('node:fs');
 const qman = require("../cogs/queue-manager.js");
+const frm = require("../cogs/formatter.js");
 const kindtostr = require("../cogs/kindtostr.js")
 const { peerId, chairId, guildId, resChan } = require("../config.json");
 const dayjs = require('dayjs');
@@ -178,16 +179,28 @@ module.exports = {
 					let voteMsgId = activeResolution["votemsg"];
 					if (interaction.message.id === voteMsgId) { 
 						let eligibleVoters = activeResolution["eligiblevoters"];
-						let withoutThisPeer = eligibleVoters.filter((voter) => voter["id"] !== interaction.member.id); // get every eligible voter object except for this member
-						let newVoterState = kindtostr.determineVoterState(interaction.customId)
-						const updateVoterObj = {
-							"id": interaction.member.id,
-							"voter_state": newVoterState
+						let thisPeer = eligibleVoters.filter((voter) => voter["id"] === interaction.member.id); // Make sure they are a peer
+						if (thisPeer.length > 0) {
+							thisPeer = thisPeer[0];
+							let withoutThisPeer = eligibleVoters.filter((voter) => voter["id"] !== interaction.member.id); // get every eligible voter object except for this member
+							let newVoterState = kindtostr.determineVoterState(interaction.customId)
+							thisPeer["voter_state"] = newVoterState;
+							withoutThisPeer.push(thisPeer);
+							qman.changeProperty(activeResolution.user, "eligiblevoters", withoutThisPeer);
+							let getEmoji = kindtostr.determineVoterState(newVoterState);
+							await interaction.reply({ content: `You have voted ${getEmoji}.`, flags: MessageFlags.Ephemeral});
+
+
+							// We also need to update the tally message
+							
+							let tallyMsgId = activeResolution["tallymsg"];
+							const dateFormatted = dayjs.unix(activeResolution["startdate"]).format("YYYY-MM-DD");
+							let newTallyMsg = frm.formatTally(withoutThisPeer, dateFormatted);
+							let tallyMsg = await interaction.channel.messages.fetch(tallyMsgId);
+							await tallyMsg.edit(newTallyMsg);
+						} else {
+							await interaction.reply({ content: "You are not eligible to vote on this resolution because you were not a Peer at the time it was created.", flags: MessageFlags.Ephemeral });
 						}
-						withoutThisPeer.push(updateVoterObj);
-						let getEmoji = kindtostr.determineVoterState(newVoterState);
-						qman.changeProperty(activeResolution.user, "eligiblevoters", withoutThisPeer);
-						await interaction.reply({ content: `You have voted ${getEmoji}.`, flags: MessageFlags.Ephemeral});
 					} else {
 						await interaction.reply({ content: "That vote is no longer active.", flags: MessageFlags.Ephemeral});
 					}

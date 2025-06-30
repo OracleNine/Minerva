@@ -125,11 +125,43 @@ function generateResMsg(proposal) {
     }
     return ffResTxt;
 }
+function formatTally(eligiblePeers, currentDate) {
+						let tallyHeader = `\`\`\`ini
+[PEER RESOLUTION] ${currentDate}
+🔴 LIVE TALLY
+\`\`\`\n`
+    let tallyBody = "";
+    let votedYes = 0;
+    let votedNo = 0;
+    let votedAbstain = 0;
+    for (let i = 0; i < eligiblePeers.length; i++) {
+        tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + eligiblePeers[i].name + `\`\n`;
+        if (eligiblePeers[i].voter_state === 1) {
+            votedYes++;
+        } else if (eligiblePeers[i].voter_state === 2) {
+            votedNo++;
+        } else if (eligiblePeers[i].voter_state === 3) {
+            votedAbstain++;
+        }
+    }
+        let tallyFooter = `\n\`\`\`
+      YES: ${votedYes}
+       NO: ${votedNo}
+  ABSTAIN: ${votedAbstain}
+\`\`\`
+\`\`\`
+   RESULT: PENDING
+\`\`\``
+
+    let tallyMsg = tallyHeader + tallyBody + tallyFooter;
+    return tallyMsg;
+}
 
 module.exports = {
     formatHeader, 
     truncateMsg,
     formatDetails,
     generateResMsg,
-    snip
+    snip,
+    formatTally
 }

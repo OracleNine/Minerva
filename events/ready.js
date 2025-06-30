@@ -1,5 +1,5 @@
 const { Events, ButtonBuilder, ActionRowBuilder, ButtonStyle, SeparatorBuilder, SeparatorSpacingSize, MessageFlags } = require('discord.js');
-const { resChan, guildId, peerId, yes, no, abstain, clientId, } = require("../config.json");
+const { resChan, guildId, peerId, yes, no, abstain, clientId, absent } = require("../config.json");
 const cron = require("node-cron");
 const qman = require("../cogs/queue-manager.js");
 const frm = require("../cogs/formatter.js");
@@ -16,12 +16,6 @@ module.exports = {
 		const getServer = await client.guilds.fetch(guildId).catch(console.error);
 		const getChannel = await getServer.channels.fetch(resChan).catch(console.error);
 
-		async function closeResolution(activeResolution) {	
-			// Have all eligible users voted?
-			let voteMsgId = activeResolution["votemsg"];
-			let eligibleVoters = activeResolution["eligiblevoters"];
-		}
-
 		async function queueLoop() {
 			// Is a resolution open?
 			let activeResolution = qman.findActive();
@@ -29,7 +23,7 @@ module.exports = {
 				activeResolution = activeResolution[0];
 				// Has 72 hours passed?
 				if (activeResolution["enddate"] <= dayjs().unix()) {// YES
-					closeResolution(activeResolution);
+					console.log("72 hours have passed");
 				} else { // NO
 					let eligibleVoters = activeResolution["eligiblevoters"];
 					let allVotersVoted = true;
@@ -84,17 +78,18 @@ module.exports = {
 
 						// Obtain a list of current peers and save them to the proposal object
 						let peerRole = await getServer.members.fetch();
-						let listPeers = peerRole.filter(m => {
+						let allPeers = peerRole.filter(m => {
 							return m.roles.cache.hasAny(peerId) === true;
 						});
-						listPeers = listPeers.map(m=>m.user.id);
+						let listPeers = allPeers.map(m=>m.user.id);
 						// Figuring this out was possibly the most painful 2 hours of my life
-
+						let getPeerNames = allPeers.map(m=>m.displayName);
 						let elPeersArr = [];
 
 						for (let i = 0; i < listPeers.length; i++) {
 							let usrObj = {
 								id: listPeers[i],
+								name: getPeerNames[i],
 								voter_state: 0
 							}
 							elPeersArr.push(usrObj);
@@ -136,15 +131,23 @@ THRESHOLD: ${threshold}
 							components: [vote_row]
 						});
 
-												// Set active to true for this proposal
 						let today = dayjs();
 
-						qman.changeProperty(nextProp.user, "active", true);
-						qman.changeProperty(nextProp.user, "startdate", today.unix());
+						nextProp["active"] = true;
+						nextProp["startdate"] = today.unix();
 						const deadline = today.add(3, "day").unix();
-						qman.changeProperty(nextProp.user, "enddate", deadline);
-						qman.changeProperty(nextProp.user, "votemsg", sendVote.id);
-						qman.changeProperty(nextProp.user, "eligiblevoters", elPeersArr);
+						nextProp["enddate"] = deadline;
+						nextProp["votemsg"] = sendVote.id;
+						nextProp["eligiblevoters"] = elPeersArr;
+
+						let tallyMessage = frm.formatTally(elPeersArr, today.format("YYYY-MM-DD"));
+						let sendTallyMsg = await getChannel.send(tallyMessage);
+						
+						nextProp["tallymsg"] = sendTallyMsg.id;
+
+						// Update the queue object
+						qman.removeFrmQueue(nextProp.user);
+						qman.addToQueue(nextProp);
 
 					} catch(err) {
 						console.error("Could not post resolution, removing it from the queue..." + err);
