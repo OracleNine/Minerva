@@ -32,8 +32,7 @@ module.exports = {
 					for (let i = 0; i < eligibleVoters.length; i++) {
 						let voter = eligibleVoters[i];
 						let state = voter.voter_state;
-
-						if (state == 0) {
+						if (state === 0) {
 							allVotersVoted = false;
 						}
 					}
