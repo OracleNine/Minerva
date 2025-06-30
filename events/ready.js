@@ -24,7 +24,8 @@ module.exports = {
 			let finalMsg = frm.finalTally(activeResolution["eligiblevoters"], formatDate, proposalThreshold)
 
 			let tallyMsg = await getChannel.messages.fetch(activeResolution["tallymsg"]);
-			await tallyMsg.edit(finalMsg);
+			await tallyMsg.delete()
+			.then(async () => await getChannel.send(finalMsg));
 			qman.changeProperty(activeResolution["user"], "active", false);
 			qman.removeFrmQueue(activeResolution["user"]);
 		}
