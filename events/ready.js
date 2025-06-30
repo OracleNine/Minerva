@@ -16,6 +16,19 @@ module.exports = {
 		const getServer = await client.guilds.fetch(guildId).catch(console.error);
 		const getChannel = await getServer.channels.fetch(resChan).catch(console.error);
 
+		async function closeActive(activeResolution) {
+			let proposalType = activeResolution["kind"];
+			let proposalThreshold = kts.determineThreshold(proposalType);
+			let startDate = activeResolution["startdate"];
+			let formatDate = dayjs.unix(startDate).format("YYYY-MM-DD");
+			let finalMsg = frm.finalTally(activeResolution["eligiblevoters"], formatDate, proposalThreshold)
+
+			let tallyMsg = await getChannel.messages.fetch(activeResolution["tallymsg"]);
+			await tallyMsg.edit(finalMsg);
+			qman.changeProperty(activeResolution["user"], "active", false);
+			qman.removeFrmQueue(activeResolution["user"]);
+		}
+
 		async function queueLoop() {
 			// Is a resolution open?
 			let activeResolution = qman.findActive();
@@ -23,7 +36,7 @@ module.exports = {
 				activeResolution = activeResolution[0];
 				// Has 72 hours passed?
 				if (activeResolution["enddate"] <= dayjs().unix()) {// YES
-					console.log("72 hours have passed");
+					closeActive(activeResolution);
 				} else { // NO
 					let eligibleVoters = activeResolution["eligiblevoters"];
 					let allVotersVoted = true;
@@ -38,9 +51,9 @@ module.exports = {
 					}
 					// Have all eligible peers voted?
 					if (allVotersVoted) { // YES
-						console.log("Everyone has voted");
+						closeActive(activeResolution);
 					} else { // NO
-						console.log("Not everyone has voted");
+						return;
 					}
 					
 				}	

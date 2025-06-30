@@ -126,7 +126,7 @@ function generateResMsg(proposal) {
     return ffResTxt;
 }
 function formatTally(eligiblePeers, currentDate) {
-						let tallyHeader = `\`\`\`ini
+    let tallyHeader = `\`\`\`ini
 [PEER RESOLUTION] ${currentDate}
 🔴 LIVE TALLY
 \`\`\`\n`
@@ -144,7 +144,7 @@ function formatTally(eligiblePeers, currentDate) {
             votedAbstain++;
         }
     }
-        let tallyFooter = `\n\`\`\`
+    let tallyFooter = `\n\`\`\`
       YES: ${votedYes}
        NO: ${votedNo}
   ABSTAIN: ${votedAbstain}
@@ -156,6 +156,44 @@ function formatTally(eligiblePeers, currentDate) {
     let tallyMsg = tallyHeader + tallyBody + tallyFooter;
     return tallyMsg;
 }
+function finalTally(eligiblePeers, currentDate, threshold) {
+    let tallyHeader = `\`\`\`ini
+[PEER RESOLUTION] ${currentDate}
+FINAL TALLY
+\`\`\`\n`
+    let tallyBody = "";
+    let votedYes = 0;
+    let votedNo = 0;
+    let votedAbstain = 0;
+    for (let i = 0; i < eligiblePeers.length; i++) {
+        tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + eligiblePeers[i].name + `\`\n`;
+        if (eligiblePeers[i].voter_state === 1) {
+            votedYes++;
+        } else if (eligiblePeers[i].voter_state === 2) {
+            votedNo++;
+        } else if (eligiblePeers[i].voter_state === 3) {
+            votedAbstain++;
+        }
+    }
+    let votePercentage = votedYes / (votedYes + votedNo);
+    let resultString = "";
+    if (votePercentage > threshold) {
+        resultString = "RESOLUTION PASSES";
+    } else {
+        resultString = "RESOLUTION FAILS";
+    }
+    let tallyFooter = `\n\`\`\`
+      YES: ${votedYes}
+       NO: ${votedNo}
+  ABSTAIN: ${votedAbstain}
+\`\`\`
+\`\`\`
+   RESULT: ${resultString}
+\`\`\``
+    let tallyMsg = tallyHeader + tallyBody + tallyFooter;
+    return tallyMsg;
+
+}
 
 module.exports = {
     formatHeader, 
@@ -163,5 +201,6 @@ module.exports = {
     formatDetails,
     generateResMsg,
     snip,
-    formatTally
+    formatTally,
+    finalTally
 }
