@@ -187,14 +187,18 @@ module.exports = {
 						if (thisPeer.length === 0) {
 							await interaction.reply({ content: "You are not eligible to vote on this resolution because you were not a Peer at the time it was created.", flags: MessageFlags.Ephemeral });
 						} else {
-							thisPeer = thisPeer[0]; // Get the Peer object
-							let withoutThisPeer = eligibleVoters.filter((voter) => voter["id"] !== interaction.member.id); // get every eligible voter object except for this member
-							let newVoterState = kindtostr.determineVoterState(interaction.customId); // Turn the voter state into a number
+							// Update the Peer object in the eligible voters list
+							thisPeer = thisPeer[0];
+							let withoutThisPeer = eligibleVoters.filter((voter) => voter["id"] !== interaction.member.id);
+							let newVoterState = kindtostr.determineVoterState(interaction.customId); 
 							thisPeer["voter_state"] = newVoterState; 
-							withoutThisPeer.push(thisPeer);
+							withoutThisPeer.push(thisPeer); 
+
+							// Update the queue with the new information and respond to the user
 							qman.changeProperty(activeResolution.user, "eligiblevoters", withoutThisPeer);
 							let getEmoji = kindtostr.determineVoterState(newVoterState);
 							await interaction.reply({ content: `You have voted ${getEmoji}.`, flags: MessageFlags.Ephemeral});
+
 							// We also need to update the tally message
 							let tallyMsgId = activeResolution["tallymsg"];
 							const dateFormatted = dayjs.unix(activeResolution["startdate"]).format("YYYY-MM-DD");

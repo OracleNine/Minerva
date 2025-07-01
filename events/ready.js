@@ -74,7 +74,7 @@ module.exports = {
 						// First format the header
 						const getAuthor = await getServer.members.fetch(nextProp.user).catch(console.error);
 						const getNow = dayjs().format("YYYY-MM-DD");
-						let header = frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.nickname, getNow);
+						let header = frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.displayName, getNow);
 
 
 						// Post the vote-msg and add reactions
