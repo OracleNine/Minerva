@@ -174,38 +174,35 @@ module.exports = {
 		} else if (interaction.isButton()) {
 			if (interaction.customId === "vote_yes" || interaction.customId === "vote_no" || interaction.customId === "vote_abstain") {
 				let activeResolution = qman.findActive();
-				if (activeResolution.length > 0) {
+				if (activeResolution.length === 0) {
+					await interaction.reply({ content: "That vote is no longer active.", flags: MessageFlags.Ephemeral});
+				} else {
 					activeResolution = activeResolution[0];
 					let voteMsgId = activeResolution["votemsg"];
-					if (interaction.message.id === voteMsgId) { 
+					if (interaction.message.id !== voteMsgId) {
+						await interaction.reply({ content: "That vote is no longer active.", flags: MessageFlags.Ephemeral});
+					} else {
 						let eligibleVoters = activeResolution["eligiblevoters"];
-						let thisPeer = eligibleVoters.filter((voter) => voter["id"] === interaction.member.id); // Make sure they are a peer
-						if (thisPeer.length > 0) {
-							thisPeer = thisPeer[0];
+						let thisPeer = eligibleVoters.filter((voter) => voter["id"] === interaction.member.id); // Make sure they are an eligible peer
+						if (thisPeer.length === 0) {
+							await interaction.reply({ content: "You are not eligible to vote on this resolution because you were not a Peer at the time it was created.", flags: MessageFlags.Ephemeral });
+						} else {
+							thisPeer = thisPeer[0]; // Get the Peer object
 							let withoutThisPeer = eligibleVoters.filter((voter) => voter["id"] !== interaction.member.id); // get every eligible voter object except for this member
-							let newVoterState = kindtostr.determineVoterState(interaction.customId);
-							thisPeer["voter_state"] = newVoterState;
+							let newVoterState = kindtostr.determineVoterState(interaction.customId); // Turn the voter state into a number
+							thisPeer["voter_state"] = newVoterState; 
 							withoutThisPeer.push(thisPeer);
 							qman.changeProperty(activeResolution.user, "eligiblevoters", withoutThisPeer);
 							let getEmoji = kindtostr.determineVoterState(newVoterState);
 							await interaction.reply({ content: `You have voted ${getEmoji}.`, flags: MessageFlags.Ephemeral});
-
-
 							// We also need to update the tally message
-							
 							let tallyMsgId = activeResolution["tallymsg"];
 							const dateFormatted = dayjs.unix(activeResolution["startdate"]).format("YYYY-MM-DD");
 							let newTallyMsg = frm.formatTally(withoutThisPeer, dateFormatted);
 							let tallyMsg = await interaction.channel.messages.fetch(tallyMsgId);
 							await tallyMsg.edit(newTallyMsg);
-						} else {
-							await interaction.reply({ content: "You are not eligible to vote on this resolution because you were not a Peer at the time it was created.", flags: MessageFlags.Ephemeral });
 						}
-					} else {
-						await interaction.reply({ content: "That vote is no longer active.", flags: MessageFlags.Ephemeral});
 					}
-				} else {
-					await interaction.reply({ content: "That vote is no longer active.", flags: MessageFlags.Ephemeral});
 				}
 			}
 		}

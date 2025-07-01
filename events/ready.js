@@ -41,7 +41,6 @@ module.exports = {
 				} else { // NO
 					let eligibleVoters = activeResolution["eligiblevoters"];
 					let allVotersVoted = true;
-
 					// Iterate through all eligible voters and make sure its not 0 (absent) for anyone
 					for (let i = 0; i < eligibleVoters.length; i++) {
 						let voter = eligibleVoters[i];
