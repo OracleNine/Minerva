@@ -202,7 +202,9 @@ FINAL TALLY
     return tallyMsg;
 
 }
-
+function sortQueue(a, b) {
+    return a.submitted - b.submitted;
+}
 module.exports = {
     formatHeader, 
     truncateMsg,
@@ -210,5 +212,6 @@ module.exports = {
     generateResMsg,
     snip,
     formatTally,
-    finalTally
+    finalTally,
+    sortQueue
 }

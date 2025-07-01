@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, MessageFlags, TextDisplayBuilder } = require('discord.js');
 const { peerId, guildId } = require('../../config.json');
 const qman = require("../../cogs/queue-manager.js");
-const kindtostr = require("../../cogs/kindtostr.js");
+const kts = require("../../cogs/kindtostr.js");
 const frm = require("../../cogs/formatter.js");
 const dayjs = require('dayjs');
 
@@ -100,6 +100,7 @@ module.exports = {
                 // If the user wants to view something in the queue
                 let qAsObj = qman.fetchQueue();
                 let qItems = qAsObj["queue"];
+                qItems = qItems.sort(frm.sortQueue); // Sorts items based on age
                 let codeProposal = "";
                 const getServer = await interaction.client.guilds.fetch(guildId);
 
@@ -110,15 +111,20 @@ module.exports = {
                         // Iterate through each item in the queue and format it
                         let item = qItems[i];
                         const getUser = await getServer.members.fetch(item.user); // This gets the nickname rather than the username
-                        codeProposal += frm.formatHeader(item.kind, item.subject, getUser.nickname, "PENDING");
+                        codeProposal += `[POSITION: ${i}]\n`
+                        codeProposal += `    CLASS: ${kts.kindToStr(item.kind)}\n`
+                        codeProposal += `  SUBJECT: ${item.subject}\n`
+                        codeProposal += `   AUTHOR: ${getUser.displayName}\n`
                     }
                 }
 
-                let finalQueueMsg = frm.truncateMsg(codeProposal);
-                await interaction.reply({ content: finalQueueMsg[0] });
-                if (finalQueueMsg.length > 1) {
-                    for (let i = 1; i < finalQueueMsg.length; i++) {
-                        await interaction.followUp({ content: finalQueueMsg[i]})
+                let queueMsgArray = frm.truncateMsg(codeProposal);
+                let firstQueueMsg = `\`\`\`ini\n` + queueMsgArray[0] + `\`\`\``
+                await interaction.reply({ content: firstQueueMsg });
+                if (queueMsgArray.length > 1) {
+                    for (let i = 1; i < queueMsgArray.length; i++) {
+                        let subsQueueMsg = `\`\`\`ini\n` + queueMsgArray[i] + `\`\`\``
+                        await interaction.followUp({ content: subsQueueMsg})
                     }
                 }
             }

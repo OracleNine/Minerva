@@ -7,6 +7,7 @@ const fs = require('node:fs');
 // Details: Details of the proposal
 // Active: A boolean, whether the proposal is being voted on or not
 // Vote-msg: If the proposal is active, this will be the ID of the message that people react to when they vote on the proposal. If the proposal is not active, this will be 0.
+// Eligiblevoters: An array of objects, each of which represent a Peer at the time the resolution is created
 
 function fetchQueue() {
     try {
