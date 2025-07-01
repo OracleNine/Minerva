@@ -14,6 +14,7 @@ function snip(arr, value) {
 }
 function formatHeader(kind, subject, author, date) {
     let resClass= kindtostr.kindToStr(kind);
+    author = author.substring(4, author.length);
     let header = `\`\`\`ini
 [PEER RESOLUTION] ${date}\n
     CLASS: ${resClass}
@@ -145,7 +146,8 @@ function formatTally(eligiblePeers, currentDate) {
     let votedAbstain = 0;
     eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
     for (let i = 0; i < eligiblePeers.length; i++) {
-        tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + eligiblePeers[i].name + `\`\n`;
+        let stripPrefix = eligiblePeers[i].name.substring(4, eligiblePeers[i].name.length);
+        tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;
         if (eligiblePeers[i].voter_state === 1) {
             votedYes++;
         } else if (eligiblePeers[i].voter_state === 2) {
@@ -174,7 +176,8 @@ FINAL TALLY
     let votedAbstain = 0;
     eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
     for (let i = 0; i < eligiblePeers.length; i++) {
-        tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + eligiblePeers[i].name + `\`\n`;
+        let stripPrefix = eligiblePeers[i].name.substring(4, eligiblePeers[i].name.length);
+        tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;
         if (eligiblePeers[i].voter_state === 1) {
             votedYes++;
         } else if (eligiblePeers[i].voter_state === 2) {

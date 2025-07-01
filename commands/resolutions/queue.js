@@ -111,10 +111,11 @@ module.exports = {
                         // Iterate through each item in the queue and format it
                         let item = qItems[i];
                         const getUser = await getServer.members.fetch(item.user); // This gets the nickname rather than the username
+                        let stripPrefix = getUser.displayName.substring(4, getUser.displayName.length);
                         codeProposal += `[POSITION: ${i}]\n`
                         codeProposal += `    CLASS: ${kts.kindToStr(item.kind)}\n`
                         codeProposal += `  SUBJECT: ${item.subject}\n`
-                        codeProposal += `   AUTHOR: ${getUser.displayName}\n`
+                        codeProposal += `   AUTHOR: ${stripPrefix}\n`
                     }
                 }
 
