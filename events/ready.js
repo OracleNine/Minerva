@@ -67,21 +67,21 @@ module.exports = {
 					return;
 				} else { // NO
 					// Start the first resolution in the queue
-					let nextProp = qman.findNextProposal();
-					try {
+					let startResolution = qman.findNextProposal();
 
+					try {
 						// Initialize the final message we will send to the channel
 						// First format the header
-						const getAuthor = await getServer.members.fetch(nextProp.user).catch(console.error);
+						const getAuthor = await getServer.members.fetch(startResolution.user).catch(console.error);
 						const getNow = dayjs().format("YYYY-MM-DD");
-						let header = frm.formatHeader(nextProp.kind, nextProp.subject, getAuthor.displayName, getNow);
+						let header = frm.formatHeader(startResolution.kind, startResolution.subject, getAuthor.displayName, getNow);
 
 
 						// Post the vote-msg and add reactions
 						await getChannel.send(`<@&${peerId}>\n` + header);
 
 						// Send the message to the channel here
-						let finalMessage = frm.generateResMsg(nextProp);
+						let finalMessage = frm.generateResMsg(startResolution);
 						if (finalMessage.length > 0) {
 							for (let i = 0; i < finalMessage.length; i++) {
 								await getChannel.send(finalMessage[i]);
@@ -89,25 +89,25 @@ module.exports = {
 						}
 
 						// Obtain a list of current peers and save them to the proposal object
-						let peerRole = await getServer.members.fetch();
-						let allPeers = peerRole.filter(m => {
+						let hasPeerRole = await getServer.members.fetch();
+						let allPeers = hasPeerRole.filter(m => {
 							return m.roles.cache.hasAny(peerId) === true;
 						});
-						let listPeers = allPeers.map(m=>m.user.id);
+						let listPeersById = allPeers.map(m=>m.user.id);
 						// Figuring this out was possibly the most painful 2 hours of my life
-						let getPeerNames = allPeers.map(m=>m.displayName);
-						let elPeersArr = [];
+						let listPeersByName = allPeers.map(m=>m.displayName);
+						let eligiblePeers = [];
 
-						for (let i = 0; i < listPeers.length; i++) {
+						for (let i = 0; i < listPeersById.length; i++) {
 							let usrObj = {
-								id: listPeers[i],
-								name: getPeerNames[i],
+								id: listPeersById[i],
+								name: listPeersByName[i],
 								voter_state: 0
 							}
-							elPeersArr.push(usrObj);
+							eligiblePeers.push(usrObj);
 						}
 
-						let threshold = kts.determineThreshold(nextProp.kind);
+						let threshold = kts.determineThreshold(startResolution.kind);
 						if (threshold === 2/3) {
 							threshold = "2/3";
 						} else if (threshold === 1/2) {
@@ -145,25 +145,25 @@ THRESHOLD: ${threshold}
 
 						let today = dayjs();
 
-						nextProp["active"] = true;
-						nextProp["startdate"] = today.unix();
+						startResolution["active"] = true;
+						startResolution["startdate"] = today.unix();
 						const deadline = today.add(3, "day").unix();
-						nextProp["enddate"] = deadline;
-						nextProp["votemsg"] = sendVote.id;
-						nextProp["eligiblevoters"] = elPeersArr;
+						startResolution["enddate"] = deadline;
+						startResolution["votemsg"] = sendVote.id;
+						startResolution["eligiblevoters"] = eligiblePeers;
 
-						let tallyMessage = frm.formatTally(elPeersArr, today.format("YYYY-MM-DD"));
+						let tallyMessage = frm.formatTally(eligiblePeers, today.format("YYYY-MM-DD"));
 						let sendTallyMsg = await getChannel.send(tallyMessage);
 						
-						nextProp["tallymsg"] = sendTallyMsg.id;
+						startResolution["tallymsg"] = sendTallyMsg.id;
 
 						// Update the queue object
-						qman.removeFrmQueue(nextProp.user);
-						qman.addToQueue(nextProp);
+						qman.removeFrmQueue(startResolution.user);
+						qman.addToQueue(startResolution);
 
 					} catch(err) {
 						console.error("Could not post resolution, removing it from the queue..." + err);
-						qman.removeFrmQueue(nextProp.user);
+						qman.removeFrmQueue(startResolution.user);
 						return;
 					}
 				}

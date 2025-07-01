@@ -31,30 +31,30 @@ module.exports = {
 			if (peerResolutionClasses.indexOf(interaction.customId) !== -1) {
 				// Make sure the modal is one of the peer resolution classes
 
-				const propAsObj = {};
+				const newProposal = {};
 
-				propAsObj.user  = interaction.member.id;
-				propAsObj.submitted = dayjs().unix();
-				propAsObj.kind = interaction.customId;
-				propAsObj.active = false;
-				propAsObj.votemsg = "0";
-				propAsObj.startdate = "";
-				propAsObj.enddate = "";
-				propAsObj.eligiblevoters = [];
+				newProposal.user  = interaction.member.id;
+				newProposal.submitted = dayjs().unix();
+				newProposal.kind = interaction.customId;
+				newProposal.active = false;
+				newProposal.votemsg = "0";
+				newProposal.startdate = "";
+				newProposal.enddate = "";
+				newProposal.eligiblevoters = [];
 
 				if (peerResolutionClasses.indexOf(interaction.customId) >= 0 && peerResolutionClasses.indexOf(interaction.customId) <= 3) {
-					propAsObj.subject = interaction.fields.getTextInputValue("amendmentTitle");
-					propAsObj.summary = interaction.fields.getTextInputValue("amendmentSummary");
-					propAsObj.details = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
+					newProposal.subject = interaction.fields.getTextInputValue("amendmentTitle");
+					newProposal.summary = interaction.fields.getTextInputValue("amendmentSummary");
+					newProposal.details = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
 				} else if (peerResolutionClasses.indexOf(interaction.customId) == 4 || peerResolutionClasses.indexOf(interaction.customId) == 5) {
-					propAsObj.subject = interaction.fields.getTextInputValue("appSubject");
+					newProposal.subject = interaction.fields.getTextInputValue("appSubject");
 				} else if (peerResolutionClasses.indexOf(interaction.customId) >= 6 && peerResolutionClasses.indexOf(interaction.customId) <= 8) {
-					propAsObj.subject = interaction.fields.getTextInputValue("injSubject");
-					propAsObj.details = interaction.fields.getTextInputValue("injDesc");
-					propAsObj.desire = interaction.fields.getTextInputValue("injOut");
+					newProposal.subject = interaction.fields.getTextInputValue("injSubject");
+					newProposal.details = interaction.fields.getTextInputValue("injDesc");
+					newProposal.desire = interaction.fields.getTextInputValue("injOut");
 				}
 
-				let result = qman.addToQueue(propAsObj);
+				let result = qman.addToQueue(newProposal);
 
 				await interaction.reply({ content: result, flags: MessageFlags.Ephemeral});
 			}
@@ -62,14 +62,14 @@ module.exports = {
 		} else if (interaction.isStringSelectMenu()) {
 			// if someone is choosing a proposal class, show the appropriate modal
 			if (interaction.customId === "proposalSelect") {
-				let dynTitle = kindtostr.kindToStr(interaction.values[0]); // Convert the kind of resolution into a string that we can use to set the title of the modal
+				let modalTitle = kindtostr.kindToStr(interaction.values[0]); // Convert the kind of resolution into a string that we can use to set the title of the modal
 
 				// If the user selected an amendment of an official document
 				if (interaction.values[0] === "amd_admin" || interaction.values[0] === "amd_rp" || interaction.values[0] === "amd_format" || interaction.values[0] === "amd_community") {
 					
 					const modal = new ModalBuilder()
 						.setCustomId(interaction.values[0])
-						.setTitle(dynTitle);
+						.setTitle(modalTitle);
 
 					const amendmentTitle = new TextInputBuilder()
 						.setCustomId('amendmentTitle')
@@ -117,7 +117,7 @@ module.exports = {
 						// Now make the modal
 						const modal = new ModalBuilder()
 							.setCustomId(interaction.values[0])
-							.setTitle(dynTitle);
+							.setTitle(modalTitle);
 
 						const applicationSubject = new TextInputBuilder()
 							.setCustomId("appSubject")
@@ -139,7 +139,7 @@ module.exports = {
 					// Now make the modal
 					const modal = new ModalBuilder()
 						.setCustomId(interaction.values[0])
-						.setTitle(dynTitle);
+						.setTitle(modalTitle);
 
 					const injunctionSubject = new TextInputBuilder()
 						.setCustomId("injSubject")
@@ -196,7 +196,7 @@ module.exports = {
 
 							// Update the queue with the new information and respond to the user
 							qman.changeProperty(activeResolution.user, "eligiblevoters", withoutThisPeer);
-							let getEmoji = kindtostr.determineVoterState(newVoterState);
+							const getEmoji = kindtostr.determineVoterState(newVoterState);
 							await interaction.reply({ content: `You have voted ${getEmoji}.`, flags: MessageFlags.Ephemeral});
 
 							// We also need to update the tally message

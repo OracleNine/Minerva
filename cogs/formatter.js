@@ -175,6 +175,7 @@ FINAL TALLY
     let votedNo = 0;
     let votedAbstain = 0;
     eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
+
     for (let i = 0; i < eligiblePeers.length; i++) {
         let stripPrefix = eligiblePeers[i].name.substring(4, eligiblePeers[i].name.length);
         tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;
@@ -186,6 +187,7 @@ FINAL TALLY
             votedAbstain++;
         }
     }
+    
     let votePercentage = votedYes / (votedYes + votedNo);
     let resultString = "";
     if (votePercentage > threshold) {

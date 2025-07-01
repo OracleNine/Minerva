@@ -1,10 +1,17 @@
-const { ContextMenuCommandBuilder, ApplicationCommandType } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const qman = require("../../cogs/queue-manager.js");
 
 module.exports = {
-	data: new ContextMenuCommandBuilder()
+	data: new SlashCommandBuilder()
 		.setName("spook")
-		.setType(ApplicationCommandType.Message),
+		.setDescription("A command for testing"),
 	async execute(interaction) {
-		await interaction.reply({content: "Spook!"});
+		if (interaction.user.id !== "184011968946896896") {
+			await interaction.reply({ content: "No permission.", flags: MessageFlags.Ephemeral});
+		} else {
+			const youngest = qman.findNextProposal();
+			console.log(youngest)
+			await interaction.reply({ content: "Spook!", flags: MessageFlags.Ephemeral });
+		}
 	}
 }

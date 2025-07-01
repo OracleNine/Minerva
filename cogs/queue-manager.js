@@ -85,22 +85,16 @@ function findActive() {
         return false;
     }
 }
+function sortQueueByDate(a, b) {
+    return a.submitted - b.submitted;
+}
 function findNextProposal() {
     let qAsObj = fetchQueue();
     let qItems = qAsObj["queue"];
-    let dateArr = [];
 
-    for (let i = 0; i < qItems.length; i++) {
-        let item = qItems[i];
-        let submitDate = item["submitted"];
-        dateArr.push(submitDate);
-    }
+    let sortedQItems = qItems.sort(sortQueueByDate);
 
-    let oldest = Math.min.apply(Math, dateArr);
-
-    const result = qItems.filter((proposal) => proposal["submitted"] == oldest);
-
-    return result[0];
+    return sortedQItems[0];
 }
 function changeProperty(user, property, value) {
     let qAsObj = fetchQueue();
