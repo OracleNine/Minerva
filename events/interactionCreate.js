@@ -38,8 +38,8 @@ module.exports = {
 				newProposal.kind = interaction.customId;
 				newProposal.active = false;
 				newProposal.votemsg = "0";
-				newProposal.startdate = "";
-				newProposal.enddate = "";
+				newProposal.startdate = 0;
+				newProposal.enddate = 0;
 				newProposal.eligiblevoters = [];
 
 				if (peerResolutionClasses.indexOf(interaction.customId) >= 0 && peerResolutionClasses.indexOf(interaction.customId) <= 3) {

@@ -12,6 +12,12 @@
     "chokidar": "^4.0.3",
     "dayjs": "^1.11.13",
     "discord.js": "^14.20.0",
-    "node-cron": "^4.1.1"
+    "node-cron": "^4.1.1",
+    "tsc": "^2.0.4"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "^24.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }
