@@ -1,5 +1,5 @@
-const { Events, ButtonBuilder, ActionRowBuilder, ButtonStyle, SeparatorBuilder, SeparatorSpacingSize, MessageFlags } = require('discord.js');
-const { resChan, guildId, peerId, yes, no, abstain, clientId, absent } = require("../config.json");
+const { Events, ButtonBuilder, ActionRowBuilder, ButtonStyle, Client } = require('discord.js');
+const { resChan, guildId, peerId, yes, no, abstain } = require("../config.json");
 const cron = require("node-cron");
 const qman = require("../cogs/queue-manager.js");
 const frm = require("../cogs/formatter.js");
@@ -9,7 +9,7 @@ const dayjs = require('dayjs');
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
-	async execute(client) {
+	async execute(client: typeof Client) {
 		console.log(`Ready! Logged in as ${client.user.tag}`);
 
 		// Get server, channel, and author
