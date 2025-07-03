@@ -1,5 +1,4 @@
 const kindtostr = require("../cogs/kindtostr.js");
-const peerResolutionClasses = ["amd_admin", "amd_rp", "amd_format", "amd_community", "app_member", "app_peer", "inj_rp", "inj_ip", "inj_member"];
 
 function snip(arr, value) {
     let i = 0;
