@@ -1,9 +1,9 @@
-const { SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, MessageFlags, TextDisplayBuilder } = require('discord.js');
-const { peerId, guildId } = require('../../config.json');
-const qman = require("../../cogs/queue-manager.js");
-const kts = require("../../cogs/kindtostr.js");
-const frm = require("../../cogs/formatter.js");
-const dayjs = require('dayjs');
+import { SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, MessageFlags, ChatInputCommandInteraction } from "discord.js";
+import { peerId, guildId } from "../../config.json";
+import { ProposalObject } from "minerva-structures";
+import qman from "../../cogs/queue-manager.js";
+import kts from "../../cogs/kindtostr.js";
+import frm from "../../cogs/formatter.js";
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -18,15 +18,15 @@ module.exports = {
 					{ name: 'Remove', value: 'q_remove' },
 					{ name: 'View', value: 'q_view' },
 				)),
-	async execute(interaction) {
+	async execute(interaction: ChatInputCommandInteraction<undefined|"cached"|"raw">) {
 		const category = interaction.options.getString('action');
-        if (!interaction.member.roles.cache.has(peerId)) {
+        if (!(interaction.inCachedGuild()) || !interaction.member.roles.cache.has(peerId)) {
             await interaction.reply({ content: "No permission.", flags: MessageFlags.Ephemeral });
         } else {
             if (category == "q_propose") {
             let qAsObj = qman.fetchQueue();
             let qItems = qAsObj["queue"];
-            const result = qItems.filter((proposal) => proposal["user"] == interaction.user.id);
+            const result = qItems.filter((proposal: ProposalObject) => proposal["user"] == interaction.user.id);
                 if (result.length === 0) {
 
                     // Build the menu for selecting the class of proposal
@@ -73,7 +73,7 @@ module.exports = {
                         );
 
                         // Send this menu to the user as a message
-                        const row = new ActionRowBuilder()
+                        const row = new ActionRowBuilder<StringSelectMenuBuilder>()
                             .addComponents(proposal_select);
 
                         await interaction.reply({

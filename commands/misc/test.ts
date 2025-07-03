@@ -1,11 +1,11 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const qman = require("../../cogs/queue-manager.js");
+import { SlashCommandBuilder, MessageFlags, ChatInputCommandInteraction } from 'discord.js';
+import * as qman from "../../cogs/queue-manager.js";
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("spook")
 		.setDescription("A command for testing"),
-	async execute(interaction) {
+	async execute(interaction: ChatInputCommandInteraction<undefined|"raw"|"cached">) {
 		if (interaction.user.id !== "184011968946896896") {
 			await interaction.reply({ content: "No permission.", flags: MessageFlags.Ephemeral});
 		} else {

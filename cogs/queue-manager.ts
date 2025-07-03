@@ -1,4 +1,5 @@
-const fs = require('node:fs');
+import fs from "node:fs";
+import { ProposalObject } from "minerva-structures";
 // Each entry in the queue has the folowing properties
 // User: ID of the user who submitted the proposal
 // Kind: Classification of the proposal which determines the threshold
@@ -9,7 +10,7 @@ const fs = require('node:fs');
 // Vote-msg: If the proposal is active, this will be the ID of the message that people react to when they vote on the proposal. If the proposal is not active, this will be 0.
 // Eligiblevoters: An array of objects, each of which represent a Peer at the time the resolution is created
 
-function fetchQueue() {
+export function fetchQueue() {
     try {
         const queue = fs.readFileSync("./queue.json", "utf8");
 	    let qAsObj = JSON.parse(queue);
@@ -21,7 +22,7 @@ function fetchQueue() {
     }
 }
 // Add an item to the queue
-function addToQueue(element) {
+export function addToQueue(element: object) {
     // Fetch the latest version of the queue and store it as an object
     let qAsObj = fetchQueue();
     let qItems = qAsObj["queue"]
@@ -40,22 +41,22 @@ function addToQueue(element) {
     try {
         fs.writeFileSync("./queue.json", qAsStr);
     } catch (err) {
-        console.error(error);
+        console.error(err);
     }
 
     return "Your proposal has been successfully added to the queue. You can see all items in the queue with `/queue view`.";
 }
-function removeFrmQueue(user) {
+export function removeFrmQueue(user: string) {
     // Need to make sure the queue exists and then store it as an object
     let qAsObj = fetchQueue();
     let qItems = qAsObj["queue"]
 
-    const isActive = qItems.filter((proposal) => proposal["user"] == user)
+    const isActive = qItems.filter((proposal: ProposalObject) => proposal["user"] == user)
     if (isActive.length > 0) {
         if (isActive[0].active === true) {
             return "You cannot remove an active item from the queue."
         } else {
-            const result = qItems.filter((proposal) => proposal["user"] != user)
+            const result = qItems.filter((proposal: ProposalObject) => proposal["user"] != user)
             const newQObj = {
                 "queue": result
             }
@@ -73,11 +74,11 @@ function removeFrmQueue(user) {
         return "You have no proposals in the queue.";
     }
 }
-function findActive() {
+export function findActive() {
     let qAsObj = fetchQueue();
     let qItems = qAsObj["queue"];
 
-    const result = qItems.filter((proposal) => proposal["active"] == true);
+    const result = qItems.filter((proposal: ProposalObject) => proposal["active"] == true);
 
     if (result.length > 0) {
         return result;
@@ -85,10 +86,10 @@ function findActive() {
         return false;
     }
 }
-function sortQueueByDate(a, b) {
+export function sortQueueByDate(a: ProposalObject, b: ProposalObject) {
     return a.submitted - b.submitted;
 }
-function findNextProposal() {
+export function findNextProposal() {
     let qAsObj = fetchQueue();
     let qItems = qAsObj["queue"];
 
@@ -96,11 +97,11 @@ function findNextProposal() {
 
     return sortedQItems[0];
 }
-function changeProperty(user, property, value) {
+export function changeProperty(user: string, property: string, value: string | number | object[] | boolean) {
     let qAsObj = fetchQueue();
     let qItems = qAsObj["queue"];
-    let targetItem = qItems.filter((proposal) => proposal["user"] === user);
-    let without = qItems.filter((proposal) => proposal["user"] !== user); // Every item in the queue except our target
+    let targetItem = qItems.filter((proposal: ProposalObject) => proposal["user"] === user);
+    let without = qItems.filter((proposal: ProposalObject) => proposal["user"] !== user); // Every item in the queue except our target
 
     if (targetItem.length > 0) {
         let itemToChange = targetItem[0];
@@ -116,13 +117,4 @@ function changeProperty(user, property, value) {
             console.error(err);
         }
     }
-}
-
-module.exports = {
-    addToQueue,
-    removeFrmQueue,
-    fetchQueue,
-    findActive,
-    findNextProposal,
-    changeProperty
 }

@@ -1,9 +1,9 @@
 import { BaseInteraction, Events, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, GuildMember, APIInteractionGuildMember, Message } from "discord.js";
-import qman from "../cogs/queue-manager.js";
-import frm from "../cogs/formatter.js";
-import kts from "../cogs/kindtostr.js";
+import * as qman from "../cogs/queue-manager.js";
+import * as frm from "../cogs/formatter.js";
+import * as kts from "../cogs/kindtostr.js";
 import { chairId, peerResolutionClasses } from "../config.json";
-import type { VoterObject } from "minerva-structures";
+import { ProposalObject, VoterObject } from "minerva-structures";
 import dayjs from "dayjs";
 
 module.exports = {
@@ -29,21 +29,6 @@ module.exports = {
 
 			if (peerResolutionClasses.indexOf(interaction.customId) !== -1) {
 				// Make sure the modal is one of the peer resolution classes
-
-				class ProposalObject {
-					user: string;
-					submitted: number;
-					kind: string;
-					active: boolean;
-					votemsg: string;
-					startdate: number;
-					enddate: number;
-					eligiblevoters: object[];
-					subject: string;
-					summary: string;
-					details: string;
-					desire: string;
-				}
 
 				const newProposal = new ProposalObject();
 
@@ -80,7 +65,7 @@ module.exports = {
 		} else if (interaction.isStringSelectMenu()) {
 			// if someone is choosing a proposal class, show the appropriate modal
 			if (interaction.customId === "proposalSelect") {
-				let modalTitle = kts.kindToStr(interaction.values[0]); // Convert the kind of resolution into a string that we can use to set the title of the modal
+				let modalTitle = kts.kindToStr(interaction.values[0]!); // Convert the kind of resolution into a string that we can use to set the title of the modal
 
 				// If the user selected an amendment of an official document
 				if (modalTitle == undefined) {
@@ -219,7 +204,7 @@ module.exports = {
 
 								// Update the queue with the new information and respond to the user
 								qman.changeProperty(activeResolution.user, "eligiblevoters", withoutThisPeer);
-								const getEmoji = kts.determineVoterState(newVoterState);
+								const getEmoji = kts.voterStateToEmoji(newVoterState!);
 								await interaction.reply({ content: `You have voted ${getEmoji}.`, flags: MessageFlags.Ephemeral});
 
 								// We also need to update the tally message

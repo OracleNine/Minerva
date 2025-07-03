@@ -1,6 +1,6 @@
-const { yes, no, abstain, absent } = require("../config.json");
+import { yes, no, abstain, absent } from "../config.json";
 
-function kindToStr(elem) {
+export function kindToStr(elem: string) {
     switch(elem) {
         case "amd_admin":
             return "Amendment of Administrative Charter";
@@ -22,7 +22,7 @@ function kindToStr(elem) {
             return "Injunction on User Behavior";
     }
 }
-function determineThreshold(elem) {
+export function determineThreshold(elem: string) {
     switch(elem) {
         case "amd_admin":
             return 2/3;
@@ -44,7 +44,7 @@ function determineThreshold(elem) {
             return 1/2;
     }
 }
-function determineVoterState(elem) {
+export function determineVoterState(elem: string) {
     switch(elem) {
         case "vote_yes":
             return 1;
@@ -54,6 +54,10 @@ function determineVoterState(elem) {
             return 3;
         case "vote_absent":
             return 0;
+    }
+}
+export function voterStateToEmoji(elem: number) {
+    switch(elem) {
         case 1:
             return `<:yes:${yes}>`;
         case 2:

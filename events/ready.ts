@@ -1,9 +1,9 @@
 import { Client, Guild, Events, ButtonBuilder, ActionRowBuilder, ButtonStyle, GuildMember, GuildBasedChannel, ChannelType } from "discord.js";
 import { resChan, guildId, peerId, yes, no, abstain } from "../config.json";
 import cron from "node-cron";
-import qman from "../cogs/queue-manager.js";
-import frm from "../cogs/formatter.js";
-import kts from "../cogs/kindtostr.js";
+import * as qman from "../cogs/queue-manager.js";
+import * as frm from "../cogs/formatter.js";
+import * as kts from "../cogs/kindtostr.js";
 import dayjs from "dayjs";
 
 module.exports = {

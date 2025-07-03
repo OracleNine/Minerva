@@ -1,6 +1,8 @@
-const kindtostr = require("../cogs/kindtostr.js");
+import * as kts from "../cogs/kindtostr.js";
+import { ProposalObject, VoterObject } from "minerva-structures";
+import { peerResolutionClasses } from "../config.json";
 
-function snip(arr, value) {
+export function snip(arr: string[], value: string) {
     let i = 0;
     while (i < arr.length) {
         if (arr[i] === value) {
@@ -11,8 +13,8 @@ function snip(arr, value) {
     }
     return arr;
 }
-function formatHeader(kind, subject, author, date) {
-    let resClass= kindtostr.kindToStr(kind);
+export function formatHeader(kind: string, subject: string, author: string, date: string) {
+    let resClass= kts.kindToStr(kind);
     author = author.substring(4, author.length);
     let header = `\`\`\`ini
 [PEER RESOLUTION] ${date}\n
@@ -22,7 +24,7 @@ function formatHeader(kind, subject, author, date) {
 \`\`\``
     return header;
 }
-function formatDetails(details) {
+export function formatDetails(details: string) {
     // Put inline quotes around this ^[a-zA-Z0-9].+$
     // Put block quotes around the first and last occurrence of this ^[+|-].*
     let finalDetails = "";
@@ -33,17 +35,17 @@ function formatDetails(details) {
     for (let i = 0; i < lineBy.length; i++) {
         let line = lineBy[i];
 
-        if (line.search(/^[a-zA-Z0-9].+$/) != -1 && inCodeBlock === false) {
+        if (line!.search(/^[a-zA-Z0-9].+$/) != -1 && inCodeBlock === false) {
             finalDetails += "> `" + line + "`\n";
-        } else if (line.search(/^[a-zA-Z0-9].+$/) != -1 && inCodeBlock === true) {
+        } else if (line!.search(/^[a-zA-Z0-9].+$/) != -1 && inCodeBlock === true) {
             finalDetails += "> ```\n"
             inCodeBlock = false;
             finalDetails += "> `" + line + "`\n";
-        } else if (line.search(/^[+|-].*/) != -1 && inCodeBlock === false) {
+        } else if (line!.search(/^[+|-].*/) != -1 && inCodeBlock === false) {
             finalDetails += "> ```diff\n";
             finalDetails += "> " + line + "\n";
             inCodeBlock = true;
-        } else if (line.search(/^[+|-].*/) != -1 && inCodeBlock === true) {
+        } else if (line!.search(/^[+|-].*/) != -1 && inCodeBlock === true) {
             finalDetails += "> " + line + "\n";
         }
 
@@ -54,7 +56,7 @@ function formatDetails(details) {
     }
     return finalDetails;
 }
-function formatSummary(text) {
+export function formatSummary(text: string) {
     let finalSummary = "";
     let lineBy = text.split("\n");
 
@@ -68,19 +70,19 @@ function formatSummary(text) {
     return finalSummary;
 
 }  
-function truncateMsg(text) {
-
+export function truncateMsg(text: string) {
     // Text display components have a char limit of 2000. To avoid running into errors, this function splits up the message into 1800 char chunks
     // which is returned as an array. The bot can then iterate through that array until all parts of the message have been sent.
-
     text += "\n";
-
     let txtArr = text.match(/[\S\s]{1,1800}[\.|\n|\?|\!]/g);
 
-    return txtArr;
-
+    if (txtArr !== null) {
+        return txtArr;
+    } else {
+        return "Unable to regex message, contact Oracle.";
+    }
 }
-function generateResMsg(proposal) {
+export function generateResMsg(proposal: ProposalObject) {
     let ffResTxt = [];
     if (peerResolutionClasses.indexOf(proposal.kind) >= 0 && peerResolutionClasses.indexOf(proposal.kind) <= 3) {
         // Summary
@@ -90,7 +92,7 @@ function generateResMsg(proposal) {
             if (i === 0) {
                 summaryFormatted += "> ### Summary of Resolution\n";
             }
-            summaryFormatted += formatSummary(truncSummary[i])
+            summaryFormatted += formatSummary(truncSummary[i]!);
             ffResTxt.push(summaryFormatted);
         }
         // Details
@@ -100,7 +102,7 @@ function generateResMsg(proposal) {
             if (i === 0) {
                 detailsFormatted += "> ### Details of Resolution\n";
             }
-            detailsFormatted += formatDetails(truncDetails[i])
+            detailsFormatted += formatDetails(truncDetails[i]!);
             ffResTxt.push(detailsFormatted);
         }
     } else if (peerResolutionClasses.indexOf(proposal.kind) >= 6 && peerResolutionClasses.indexOf(proposal.kind) <= 8) {
@@ -110,7 +112,7 @@ function generateResMsg(proposal) {
             if (i === 0) {
                 doiFormatted += "> ### Description of Incident\n";
             }
-            doiFormatted += formatSummary(truncDOI[i])
+            doiFormatted += formatSummary(truncDOI[i]!);
             ffResTxt.push(doiFormatted);
         }
         let truncDesire = truncateMsg(proposal.desire);
@@ -119,13 +121,13 @@ function generateResMsg(proposal) {
             if (i === 0) {
                 desireFormatted += "> ### Preferential Outcome\n";
             }
-            desireFormatted += formatSummary(truncDesire[i])
+            desireFormatted += formatSummary(truncDesire[i]!);
             ffResTxt.push(desireFormatted);
         }
     }
     return ffResTxt;
 }
-function sortVoters(a,b) {
+export function sortVoters(a: VoterObject,b: VoterObject) {
     if (a.name < b.name) {
         return -1;
     } else if (a.name > b.name) {
@@ -134,7 +136,7 @@ function sortVoters(a,b) {
         return 0;
     }
 }
-function formatTally(eligiblePeers, currentDate) {
+export function formatTally(eligiblePeers: object[], currentDate) {
     let tallyHeader = `\`\`\`ini
 [PEER RESOLUTION] ${currentDate}
 🔴 LIVE TALLY
@@ -164,7 +166,7 @@ function formatTally(eligiblePeers, currentDate) {
     let tallyMsg = tallyHeader + tallyBody + tallyFooter;
     return tallyMsg;
 }
-function finalTally(eligiblePeers, currentDate, threshold) {
+export function finalTally(eligiblePeers, currentDate, threshold) {
     let tallyHeader = `\`\`\`ini
 [PEER RESOLUTION] ${currentDate}
 FINAL TALLY
@@ -206,7 +208,7 @@ FINAL TALLY
     return tallyMsg;
 
 }
-function sortQueue(a, b) {
+export function sortQueue(a, b) {
     return a.submitted - b.submitted;
 }
 module.exports = {
