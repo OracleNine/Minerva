@@ -1,4 +1,4 @@
-import { BaseInteraction, Events, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, GuildMember, APIInteractionGuildMember } from "discord.js";
+import { BaseInteraction, Events, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, GuildMember, APIInteractionGuildMember, Message } from "discord.js";
 import qman from "../cogs/queue-manager.js";
 import frm from "../cogs/formatter.js";
 import kts from "../cogs/kindtostr.js";
@@ -202,7 +202,9 @@ module.exports = {
 					if (interaction.message.id !== voteMsgId) {
 						await interaction.reply({ content: "That vote is no longer active.", flags: MessageFlags.Ephemeral});
 					} else {
-						if (interaction.channel !== null && interaction.inCachedGuild()) {
+						if (!(interaction.channel !== null && interaction.inCachedGuild())) {
+							await interaction.reply({ content: "This command must be executed in a guild.", flags: MessageFlags.Ephemeral });
+						} else {
 							let eligibleVoters = activeResolution["eligiblevoters"];
 							let thisPeer = eligibleVoters.filter((voter: VoterObject) => voter["id"] === interaction.member.id); // Make sure they are an eligible peer
 							if (thisPeer.length === 0) {
@@ -227,8 +229,6 @@ module.exports = {
 								let tallyMsg = await interaction.channel.messages.fetch(tallyMsgId);
 								await tallyMsg.edit(newTallyMsg);
 							}
-						} else {
-							await interaction.reply({ content: "There was an error getting either the channel, or the member.", flags: MessageFlags.Ephemeral });
 						}
 					}
 				}
