@@ -1,9 +1,10 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const { Client, Collection, GatewayIntentBits } = require('discord.js');
-const { token } = require('./config.json');
+import fs from "node:fs";
+import path from "node:path";
+import { Client, Collection, GatewayIntentBits } from "discord.js";
+import { token } from "./config.json";
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers ] });
+
+const client: any = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers ] });
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
