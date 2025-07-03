@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.1",
+    "discord-api-types": "^0.38.14",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

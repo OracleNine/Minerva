@@ -8,7 +8,7 @@ const dayjs = require('dayjs');
 
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction) {
+	async execute(interaction: any) {
 		if (interaction.isChatInputCommand()) {
 
 			const command = interaction.client.commands.get(interaction.commandName);
@@ -31,7 +31,22 @@ module.exports = {
 			if (peerResolutionClasses.indexOf(interaction.customId) !== -1) {
 				// Make sure the modal is one of the peer resolution classes
 
-				const newProposal = {};
+				class ProposalObject {
+					user: string;
+					submitted: number;
+					kind: string;
+					active: boolean;
+					votemsg: string;
+					startdate: number;
+					enddate: number;
+					eligiblevoters: object[];
+					subject: undefined;
+					summary: undefined;
+					details: undefined;
+					desire: undefined;
+				}
+
+				const newProposal = new ProposalObject();
 
 				newProposal.user  = interaction.member.id;
 				newProposal.submitted = dayjs().unix();

@@ -1,4 +1,4 @@
-const { Events, ButtonBuilder, ActionRowBuilder, ButtonStyle, Client } = require('discord.js');
+import { ChannelManager, Client, Guild, Events, ButtonBuilder, ActionRowBuilder, ButtonStyle, GuildMember, GuildBasedChannel, GuildChannel } from "discord.js";
 const { resChan, guildId, peerId, yes, no, abstain } = require("../config.json");
 const cron = require("node-cron");
 const qman = require("../cogs/queue-manager.js");
@@ -9,12 +9,8 @@ const dayjs = require('dayjs');
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
-	async execute(client: typeof Client) {
+	async execute(client: Client<true>) {
 		console.log(`Ready! Logged in as ${client.user.tag}`);
-
-		// Get server, channel, and author
-		const getServer = await client.guilds.fetch(guildId).catch(console.error);
-		const getChannel = await getServer.channels.fetch(resChan).catch(console.error);
 
 		interface proposalInterface {
 			user: string;
@@ -32,17 +28,24 @@ module.exports = {
 		}
 
 		async function closeActive(activeResolution: proposalInterface) {
-			let proposalType: string = activeResolution["kind"];
-			let proposalThreshold = kts.determineThreshold(proposalType);
-			let startDate = activeResolution["startdate"];
-			let formatDate = dayjs.unix(startDate).format("YYYY-MM-DD");
-			let finalMsg = frm.finalTally(activeResolution["eligiblevoters"], formatDate, proposalThreshold)
+			// Get server and channel
+			const getServer: void | Guild = await client.guilds.fetch(guildId);
+			const getChannel: null | GuildBasedChannel = await getServer.channels.fetch(resChan);
+			if (!(getServer instanceof Guild) || typeof getChannel === null) {
+				console.error("Could not find guild or channel");
+			} else {
+				let proposalType: string = activeResolution["kind"];
+				let proposalThreshold = kts.determineThreshold(proposalType);
+				let startDate = activeResolution["startdate"];
+				let formatDate = dayjs.unix(startDate).format("YYYY-MM-DD");
+				let finalMsg = frm.finalTally(activeResolution["eligiblevoters"], formatDate, proposalThreshold)
 
-			let tallyMsg = await getChannel.messages.fetch(activeResolution["tallymsg"]);
-			await tallyMsg.delete()
-			.then(async () => await getChannel.send(finalMsg));
-			qman.changeProperty(activeResolution["user"], "active", false);
-			qman.removeFrmQueue(activeResolution["user"]);
+				let tallyMsg = await getChannel!.messages.fetch(activeResolution["tallymsg"]);
+				await tallyMsg.delete()
+				.then(async () => await getChannel!.send(finalMsg));
+				qman.changeProperty(activeResolution["user"], "active", false);
+				qman.removeFrmQueue(activeResolution["user"]);
+			}
 		}
 
 		async function queueLoop() {
@@ -105,12 +108,12 @@ module.exports = {
 
 						// Obtain a list of current peers and save them to the proposal object
 						let hasPeerRole = await getServer.members.fetch();
-						let allPeers = hasPeerRole.filter(m => {
+						let allPeers = hasPeerRole.filter((m: GuildMember) => {
 							return m.roles.cache.hasAny(peerId) === true;
 						});
-						let listPeersById = allPeers.map(m=>m.user.id);
+						let listPeersById = allPeers.map((m: GuildMember)=>m.user.id);
 						// Figuring this out was possibly the most painful 2 hours of my life
-						let listPeersByName = allPeers.map(m=>m.displayName);
+						let listPeersByName = allPeers.map((m: GuildMember)=>m.displayName);
 						let eligiblePeers = [];
 
 						for (let i = 0; i < listPeersById.length; i++) {
@@ -185,7 +188,6 @@ THRESHOLD: ${threshold}
 			}
 		}
 
-		queueLoop();
 		cron.schedule('*/10 * * * * *', () => {
 			queueLoop();
 		});
