@@ -3,10 +3,10 @@ import * as qman from "../cogs/queue-manager.js";
 import * as frm from "../cogs/formatter.js";
 import * as kts from "../cogs/kindtostr.js";
 import { chairId, peerResolutionClasses } from "../config.json";
-import { ProposalObject, VoterObject } from "minerva-structures";
+import { ProposalObject, VoterObject } from "../structures.js";
 import dayjs from "dayjs";
 
-module.exports = {
+export default {
 	name: Events.InteractionCreate,
 	async execute(interaction: BaseInteraction<undefined|"cached"|"raw">) {
 		if (interaction.isChatInputCommand()) {
@@ -42,7 +42,8 @@ module.exports = {
 					newProposal.votemsg = "0";
 					newProposal.startdate = 0;
 					newProposal.enddate = 0;
-					newProposal.eligiblevoters = [];
+					let newEligibleVotersArray: VoterObject[] = [];
+					newProposal.eligiblevoters = newEligibleVotersArray;
 
 					if (peerResolutionClasses.indexOf(interaction.customId) >= 0 && peerResolutionClasses.indexOf(interaction.customId) <= 3) {
 						newProposal.subject = interaction.fields.getTextInputValue("amendmentTitle");

@@ -1,5 +1,10 @@
 "use strict";
-const { yes, no, abstain, absent } = require("../config.json");
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.kindToStr = kindToStr;
+exports.determineThreshold = determineThreshold;
+exports.determineVoterState = determineVoterState;
+exports.voterStateToEmoji = voterStateToEmoji;
+const config_json_1 = require("../config.json");
 function kindToStr(elem) {
     switch (elem) {
         case "amd_admin":
@@ -54,19 +59,18 @@ function determineVoterState(elem) {
             return 3;
         case "vote_absent":
             return 0;
-        case 1:
-            return `<:yes:${yes}>`;
-        case 2:
-            return `<:no:${no}>`;
-        case 3:
-            return `<:abstain:${abstain}>`;
-        case 0:
-            return `<:void:${absent}>`;
     }
 }
-module.exports = {
-    kindToStr,
-    determineThreshold,
-    determineVoterState
-};
+function voterStateToEmoji(elem) {
+    switch (elem) {
+        case 1:
+            return `<:yes:${config_json_1.yes}>`;
+        case 2:
+            return `<:no:${config_json_1.no}>`;
+        case 3:
+            return `<:abstain:${config_json_1.abstain}>`;
+        case 0:
+            return `<:void:${config_json_1.absent}>`;
+    }
+}
 //# sourceMappingURL=kindtostr.js.map

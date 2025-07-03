@@ -1,5 +1,5 @@
 import * as kts from "../cogs/kindtostr.js";
-import { ProposalObject, VoterObject } from "minerva-structures";
+import { ProposalObject, VoterObject } from "../structures";
 import { peerResolutionClasses } from "../config.json";
 
 export function snip(arr: string[], value: string) {

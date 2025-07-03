@@ -1,5 +1,16 @@
 "use strict";
-const fs = require('node:fs');
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.fetchQueue = fetchQueue;
+exports.addToQueue = addToQueue;
+exports.removeFrmQueue = removeFrmQueue;
+exports.findActive = findActive;
+exports.sortQueueByDate = sortQueueByDate;
+exports.findNextProposal = findNextProposal;
+exports.changeProperty = changeProperty;
+const node_fs_1 = __importDefault(require("node:fs"));
 // Each entry in the queue has the folowing properties
 // User: ID of the user who submitted the proposal
 // Kind: Classification of the proposal which determines the threshold
@@ -11,7 +22,7 @@ const fs = require('node:fs');
 // Eligiblevoters: An array of objects, each of which represent a Peer at the time the resolution is created
 function fetchQueue() {
     try {
-        const queue = fs.readFileSync("./queue.json", "utf8");
+        const queue = node_fs_1.default.readFileSync("./queue.json", "utf8");
         let qAsObj = JSON.parse(queue);
         return qAsObj;
     }
@@ -30,10 +41,10 @@ function addToQueue(element) {
     // Convert to string and then write to the json file
     let qAsStr = JSON.stringify(qAsObj);
     try {
-        fs.writeFileSync("./queue.json", qAsStr);
+        node_fs_1.default.writeFileSync("./queue.json", qAsStr);
     }
     catch (err) {
-        console.error(error);
+        console.error(err);
     }
     return "Your proposal has been successfully added to the queue. You can see all items in the queue with `/queue view`.";
 }
@@ -53,7 +64,7 @@ function removeFrmQueue(user) {
             };
             let qAsStr = JSON.stringify(newQObj);
             try {
-                fs.writeFileSync("./queue.json", qAsStr);
+                node_fs_1.default.writeFileSync("./queue.json", qAsStr);
             }
             catch (err) {
                 console.error(err);
@@ -99,19 +110,11 @@ function changeProperty(user, property, value) {
                 "queue": without
             };
             let qAsStr = JSON.stringify(newQObj);
-            fs.writeFileSync("./queue.json", qAsStr);
+            node_fs_1.default.writeFileSync("./queue.json", qAsStr);
         }
         catch (err) {
             console.error(err);
         }
     }
 }
-module.exports = {
-    addToQueue,
-    removeFrmQueue,
-    fetchQueue,
-    findActive,
-    findNextProposal,
-    changeProperty
-};
 //# sourceMappingURL=queue-manager.js.map

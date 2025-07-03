@@ -1,11 +1,11 @@
 import { SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, MessageFlags, ChatInputCommandInteraction } from "discord.js";
 import { peerId, guildId } from "../../config.json";
-import { ProposalObject } from "minerva-structures";
-import qman from "../../cogs/queue-manager.js";
-import kts from "../../cogs/kindtostr.js";
-import frm from "../../cogs/formatter.js";
+import { ProposalObject } from "../../structures";
+import * as qman from "../../cogs/queue-manager.js";
+import * as kts from "../../cogs/kindtostr.js";
+import * as frm from "../../cogs/formatter.js";
 
-module.exports = {
+export default {
 	data: new SlashCommandBuilder()
 		.setName('queue')
 		.setDescription('Commands related to the management of the queue.')

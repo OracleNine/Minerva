@@ -16,8 +16,9 @@ for (const folder of commandFolders) {
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
-		if ('data' in command && 'execute' in command) {
-			client.commands.set(command.data.name, command);
+		const cmd = command.default ?? command;
+		if ('data' in cmd && 'execute' in cmd) {
+			client.commands.set(cmd.data.name, cmd);
 		} else {
 			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
 		}
@@ -30,10 +31,11 @@ const eventFiles = fs.readdirSync(eventsPath).filter((file: string) => file.ends
 for (const file of eventFiles) {
 	const filePath = path.join(eventsPath, file);
 	const event = require(filePath);
-	if (event.once) {
-		client.once(event.name, (...args: any[]) => event.execute(...args));
+	const evt = event.default ?? event;
+	if (evt.once) {
+		client.once(evt.name, (...args: any[]) => evt.execute(...args));
 	} else {
-		client.on(event.name, (...args: any[]) => event.execute(...args));
+		client.on(evt.name, (...args: any[]) => evt.execute(...args));
 	}
 }
 

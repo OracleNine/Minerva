@@ -1,18 +1,16 @@
 "use strict";
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const qman = require("../../cogs/queue-manager.js");
-module.exports = {
-    data: new SlashCommandBuilder()
+Object.defineProperty(exports, "__esModule", { value: true });
+const discord_js_1 = require("discord.js");
+exports.default = {
+    data: new discord_js_1.SlashCommandBuilder()
         .setName("spook")
         .setDescription("A command for testing"),
     async execute(interaction) {
         if (interaction.user.id !== "184011968946896896") {
-            await interaction.reply({ content: "No permission.", flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: "No permission.", flags: discord_js_1.MessageFlags.Ephemeral });
         }
         else {
-            const youngest = qman.findNextProposal();
-            console.log(youngest);
-            await interaction.reply({ content: "Spook!", flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: "Spook!", flags: discord_js_1.MessageFlags.Ephemeral });
         }
     }
 };

@@ -1,6 +1,50 @@
 "use strict";
-const kindtostr = require("../cogs/kindtostr.js");
-const peerResolutionClasses = ["amd_admin", "amd_rp", "amd_format", "amd_community", "app_member", "app_peer", "inj_rp", "inj_ip", "inj_member"];
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.snip = snip;
+exports.formatHeader = formatHeader;
+exports.formatDetails = formatDetails;
+exports.formatSummary = formatSummary;
+exports.truncateMsg = truncateMsg;
+exports.generateResMsg = generateResMsg;
+exports.sortVoters = sortVoters;
+exports.formatTally = formatTally;
+exports.finalTally = finalTally;
+exports.sortQueue = sortQueue;
+const kts = __importStar(require("../cogs/kindtostr.js"));
+const config_json_1 = require("../config.json");
 function snip(arr, value) {
     let i = 0;
     while (i < arr.length) {
@@ -14,7 +58,7 @@ function snip(arr, value) {
     return arr;
 }
 function formatHeader(kind, subject, author, date) {
-    let resClass = kindtostr.kindToStr(kind);
+    let resClass = kts.kindToStr(kind);
     author = author.substring(4, author.length);
     let header = `\`\`\`ini
 [PEER RESOLUTION] ${date}\n
@@ -71,11 +115,16 @@ function truncateMsg(text) {
     // which is returned as an array. The bot can then iterate through that array until all parts of the message have been sent.
     text += "\n";
     let txtArr = text.match(/[\S\s]{1,1800}[\.|\n|\?|\!]/g);
-    return txtArr;
+    if (txtArr !== null) {
+        return txtArr;
+    }
+    else {
+        return "Unable to regex message, contact Oracle.";
+    }
 }
 function generateResMsg(proposal) {
     let ffResTxt = [];
-    if (peerResolutionClasses.indexOf(proposal.kind) >= 0 && peerResolutionClasses.indexOf(proposal.kind) <= 3) {
+    if (config_json_1.peerResolutionClasses.indexOf(proposal.kind) >= 0 && config_json_1.peerResolutionClasses.indexOf(proposal.kind) <= 3) {
         // Summary
         let truncSummary = truncateMsg(proposal.summary);
         for (let i = 0; i < truncSummary.length; i++) {
@@ -97,7 +146,7 @@ function generateResMsg(proposal) {
             ffResTxt.push(detailsFormatted);
         }
     }
-    else if (peerResolutionClasses.indexOf(proposal.kind) >= 6 && peerResolutionClasses.indexOf(proposal.kind) <= 8) {
+    else if (config_json_1.peerResolutionClasses.indexOf(proposal.kind) >= 6 && config_json_1.peerResolutionClasses.indexOf(proposal.kind) <= 8) {
         let truncDOI = truncateMsg(proposal.details);
         for (let i = 0; i < truncDOI.length; i++) {
             let doiFormatted = "";
@@ -142,7 +191,7 @@ function formatTally(eligiblePeers, currentDate) {
     eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
     for (let i = 0; i < eligiblePeers.length; i++) {
         let stripPrefix = eligiblePeers[i].name.substring(4, eligiblePeers[i].name.length);
-        tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;
+        tallyBody += kts.voterStateToEmoji(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;
         if (eligiblePeers[i].voter_state === 1) {
             votedYes++;
         }
@@ -173,7 +222,7 @@ FINAL TALLY
     eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
     for (let i = 0; i < eligiblePeers.length; i++) {
         let stripPrefix = eligiblePeers[i].name.substring(4, eligiblePeers[i].name.length);
-        tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;
+        tallyBody += kts.voterStateToEmoji(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;
         if (eligiblePeers[i].voter_state === 1) {
             votedYes++;
         }

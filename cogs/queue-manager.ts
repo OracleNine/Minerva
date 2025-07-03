@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { ProposalObject } from "minerva-structures";
+import { ProposalObject } from "../structures";
 // Each entry in the queue has the folowing properties
 // User: ID of the user who submitted the proposal
 // Kind: Classification of the proposal which determines the threshold

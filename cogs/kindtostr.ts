@@ -68,9 +68,3 @@ export function voterStateToEmoji(elem: number) {
             return`<:void:${absent}>`;
     }
 }
-
-module.exports = {
-    kindToStr,
-    determineThreshold,
-    determineVoterState
-}

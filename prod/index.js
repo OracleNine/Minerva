@@ -1,38 +1,43 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = require('node:fs');
-const path = require('node:path');
-const { Client, Collection, GatewayIntentBits, GuildMember } = require('discord.js');
-const { token } = require('./config.json');
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
-client.commands = new Collection();
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+const node_fs_1 = __importDefault(require("node:fs"));
+const node_path_1 = __importDefault(require("node:path"));
+const discord_js_1 = require("discord.js");
+const config_json_1 = require("./config.json");
+const client = new discord_js_1.Client({ intents: [discord_js_1.GatewayIntentBits.Guilds, discord_js_1.GatewayIntentBits.GuildMembers] });
+client.commands = new discord_js_1.Collection();
+const foldersPath = node_path_1.default.join(__dirname, 'commands');
+const commandFolders = node_fs_1.default.readdirSync(foldersPath);
 for (const folder of commandFolders) {
-    const commandsPath = path.join(foldersPath, folder);
-    const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
+    const commandsPath = node_path_1.default.join(foldersPath, folder);
+    const commandFiles = node_fs_1.default.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
     for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
+        const filePath = node_path_1.default.join(commandsPath, file);
         const command = require(filePath);
-        if ('data' in command && 'execute' in command) {
-            client.commands.set(command.data.name, command);
+        const cmd = command.default ?? command;
+        if ('data' in cmd && 'execute' in cmd) {
+            client.commands.set(cmd.data.name, cmd);
         }
         else {
             console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
         }
     }
 }
-const eventsPath = path.join(__dirname, 'events');
-const eventFiles = fs.readdirSync(eventsPath).filter((file) => file.endsWith('.js'));
+const eventsPath = node_path_1.default.join(__dirname, 'events');
+const eventFiles = node_fs_1.default.readdirSync(eventsPath).filter((file) => file.endsWith('.js'));
 for (const file of eventFiles) {
-    const filePath = path.join(eventsPath, file);
+    const filePath = node_path_1.default.join(eventsPath, file);
     const event = require(filePath);
-    if (event.once) {
-        client.once(event.name, (...args) => event.execute(...args));
+    const evt = event.default ?? event;
+    if (evt.once) {
+        client.once(evt.name, (...args) => evt.execute(...args));
     }
     else {
-        client.on(event.name, (...args) => event.execute(...args));
+        client.on(evt.name, (...args) => evt.execute(...args));
     }
 }
-client.login(token);
+client.login(config_json_1.token);
 //# sourceMappingURL=index.js.map

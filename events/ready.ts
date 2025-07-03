@@ -1,12 +1,13 @@
 import { Client, Guild, Events, ButtonBuilder, ActionRowBuilder, ButtonStyle, GuildMember, GuildBasedChannel, ChannelType } from "discord.js";
 import { resChan, guildId, peerId, yes, no, abstain } from "../config.json";
+import { VoterObject } from "../structures";
 import cron from "node-cron";
 import * as qman from "../cogs/queue-manager.js";
 import * as frm from "../cogs/formatter.js";
 import * as kts from "../cogs/kindtostr.js";
 import dayjs from "dayjs";
 
-module.exports = {
+export default {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client: Client<true>) {
@@ -41,7 +42,7 @@ module.exports = {
 					let proposalThreshold = kts.determineThreshold(proposalType);
 					let startDate = activeResolution["startdate"];
 					let formatDate = dayjs.unix(startDate).format("YYYY-MM-DD");
-					let finalMsg = frm.finalTally(activeResolution["eligiblevoters"], formatDate, proposalThreshold)
+					let finalMsg = frm.finalTally(<VoterObject[]>activeResolution["eligiblevoters"], formatDate, proposalThreshold!)
 
 					let tallyMsg = await getChannel.messages.fetch(activeResolution["tallymsg"]);
 					await tallyMsg.delete()
@@ -185,7 +186,7 @@ THRESHOLD: ${thresholdAsStr}
 									startResolution["votemsg"] = sendVote.id;
 									startResolution["eligiblevoters"] = eligiblePeers;
 
-									let tallyMessage = frm.formatTally(eligiblePeers, today.format("YYYY-MM-DD"));
+									let tallyMessage = frm.formatTally(<VoterObject[]>eligiblePeers, today.format("YYYY-MM-DD"));
 									let sendTallyMsg = await getChannel.send(tallyMessage);
 									
 									startResolution["tallymsg"] = sendTallyMsg.id;
