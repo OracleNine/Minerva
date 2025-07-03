@@ -12,7 +12,7 @@ declare module "minerva-structures" {
         votemsg: string;
         startdate: number;
         enddate: number;
-        eligiblevoters: object[];
+        eligiblevoters: VoterObject[];
         subject: string;
         summary: string;
         details: string;

@@ -136,7 +136,7 @@ export function sortVoters(a: VoterObject,b: VoterObject) {
         return 0;
     }
 }
-export function formatTally(eligiblePeers: object[], currentDate) {
+export function formatTally(eligiblePeers: VoterObject[], currentDate: string) {
     let tallyHeader = `\`\`\`ini
 [PEER RESOLUTION] ${currentDate}
 🔴 LIVE TALLY
@@ -147,13 +147,13 @@ export function formatTally(eligiblePeers: object[], currentDate) {
     let votedAbstain = 0;
     eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
     for (let i = 0; i < eligiblePeers.length; i++) {
-        let stripPrefix = eligiblePeers[i].name.substring(4, eligiblePeers[i].name.length);
-        tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;
-        if (eligiblePeers[i].voter_state === 1) {
+        let stripPrefix = eligiblePeers[i]!.name.substring(4, eligiblePeers[i]!.name.length);
+        tallyBody += kts.voterStateToEmoji(eligiblePeers[i]!.voter_state) + ` \`` + stripPrefix + `\`\n`;
+        if (eligiblePeers[i]!.voter_state === 1) {
             votedYes++;
-        } else if (eligiblePeers[i].voter_state === 2) {
+        } else if (eligiblePeers[i]!.voter_state === 2) {
             votedNo++;
-        } else if (eligiblePeers[i].voter_state === 3) {
+        } else if (eligiblePeers[i]!.voter_state === 3) {
             votedAbstain++;
         }
     }
@@ -166,7 +166,7 @@ export function formatTally(eligiblePeers: object[], currentDate) {
     let tallyMsg = tallyHeader + tallyBody + tallyFooter;
     return tallyMsg;
 }
-export function finalTally(eligiblePeers, currentDate, threshold) {
+export function finalTally(eligiblePeers: VoterObject[], currentDate: string, threshold: number) {
     let tallyHeader = `\`\`\`ini
 [PEER RESOLUTION] ${currentDate}
 FINAL TALLY
@@ -178,13 +178,13 @@ FINAL TALLY
     eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
 
     for (let i = 0; i < eligiblePeers.length; i++) {
-        let stripPrefix = eligiblePeers[i].name.substring(4, eligiblePeers[i].name.length);
-        tallyBody += kindtostr.determineVoterState(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;
-        if (eligiblePeers[i].voter_state === 1) {
+        let stripPrefix = eligiblePeers[i]!.name.substring(4, eligiblePeers[i]!.name.length);
+        tallyBody += kts.voterStateToEmoji(eligiblePeers[i]!.voter_state) + ` \`` + stripPrefix + `\`\n`;
+        if (eligiblePeers[i]!.voter_state === 1) {
             votedYes++;
-        } else if (eligiblePeers[i].voter_state === 2) {
+        } else if (eligiblePeers[i]!.voter_state === 2) {
             votedNo++;
-        } else if (eligiblePeers[i].voter_state === 3) {
+        } else if (eligiblePeers[i]!.voter_state === 3) {
             votedAbstain++;
         }
     }
@@ -208,7 +208,7 @@ FINAL TALLY
     return tallyMsg;
 
 }
-export function sortQueue(a, b) {
+export function sortQueue(a: ProposalObject, b: ProposalObject) {
     return a.submitted - b.submitted;
 }
 module.exports = {
