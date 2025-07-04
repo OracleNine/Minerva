@@ -84,8 +84,7 @@ export function truncateMsg(text: string) {
 }
 export function generateResMsg(proposal: ProposalObject) {
     let ffResTxt = [];
-    if (peerResolutionClasses.indexOf(proposal.kind) >= 0 && peerResolutionClasses.indexOf(proposal.kind) <= 3) {
-        // Summary
+    if (peerResolutionClasses.indexOf(proposal.kind) == 0) {
         let truncSummary = truncateMsg(proposal.summary);
         for (let i = 0; i < truncSummary.length; i++) {
             let summaryFormatted = "";
@@ -95,7 +94,6 @@ export function generateResMsg(proposal: ProposalObject) {
             summaryFormatted += formatSummary(truncSummary[i]!);
             ffResTxt.push(summaryFormatted);
         }
-        // Details
         let truncDetails = truncateMsg(proposal.details);
         for (let i = 0; i < truncDetails.length; i++) {
             let detailsFormatted = "";
@@ -105,7 +103,7 @@ export function generateResMsg(proposal: ProposalObject) {
             detailsFormatted += formatDetails(truncDetails[i]!);
             ffResTxt.push(detailsFormatted);
         }
-    } else if (peerResolutionClasses.indexOf(proposal.kind) >= 6 && peerResolutionClasses.indexOf(proposal.kind) <= 8) {
+    } else if (peerResolutionClasses.indexOf(proposal.kind) >= 3 && peerResolutionClasses.indexOf(proposal.kind) <= 5) {
         let truncDOI = truncateMsg(proposal.details);
         for (let i = 0; i < truncDOI.length; i++) {
             let doiFormatted = "";
@@ -114,6 +112,25 @@ export function generateResMsg(proposal: ProposalObject) {
             }
             doiFormatted += formatSummary(truncDOI[i]!);
             ffResTxt.push(doiFormatted);
+        }
+        let truncDesire = truncateMsg(proposal.desire);
+        for (let i = 0; i < truncDesire.length; i++) {
+            let desireFormatted = "";
+            if (i === 0) {
+                desireFormatted += "> ### Preferential Outcome\n";
+            }
+            desireFormatted += formatSummary(truncDesire[i]!);
+            ffResTxt.push(desireFormatted);
+        }
+    } else if (peerResolutionClasses.indexOf(proposal.kind) == 6) {
+        let truncDecisionSummary = truncateMsg(proposal.summary);
+        for (let i = 0; i < truncDecisionSummary.length; i++) {
+            let decisionSummaryFormatted = "";
+            if (i === 0) {
+                decisionSummaryFormatted += "> ### Summary of Decision\n";
+            }
+            decisionSummaryFormatted += formatSummary(truncDecisionSummary[i]!);
+            ffResTxt.push(decisionSummaryFormatted);
         }
         let truncDesire = truncateMsg(proposal.desire);
         for (let i = 0; i < truncDesire.length; i++) {

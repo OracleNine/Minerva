@@ -124,8 +124,7 @@ function truncateMsg(text) {
 }
 function generateResMsg(proposal) {
     let ffResTxt = [];
-    if (config_json_1.peerResolutionClasses.indexOf(proposal.kind) >= 0 && config_json_1.peerResolutionClasses.indexOf(proposal.kind) <= 3) {
-        // Summary
+    if (config_json_1.peerResolutionClasses.indexOf(proposal.kind) == 0) {
         let truncSummary = truncateMsg(proposal.summary);
         for (let i = 0; i < truncSummary.length; i++) {
             let summaryFormatted = "";
@@ -135,7 +134,6 @@ function generateResMsg(proposal) {
             summaryFormatted += formatSummary(truncSummary[i]);
             ffResTxt.push(summaryFormatted);
         }
-        // Details
         let truncDetails = truncateMsg(proposal.details);
         for (let i = 0; i < truncDetails.length; i++) {
             let detailsFormatted = "";
@@ -146,7 +144,7 @@ function generateResMsg(proposal) {
             ffResTxt.push(detailsFormatted);
         }
     }
-    else if (config_json_1.peerResolutionClasses.indexOf(proposal.kind) >= 6 && config_json_1.peerResolutionClasses.indexOf(proposal.kind) <= 8) {
+    else if (config_json_1.peerResolutionClasses.indexOf(proposal.kind) >= 3 && config_json_1.peerResolutionClasses.indexOf(proposal.kind) <= 5) {
         let truncDOI = truncateMsg(proposal.details);
         for (let i = 0; i < truncDOI.length; i++) {
             let doiFormatted = "";
@@ -155,6 +153,26 @@ function generateResMsg(proposal) {
             }
             doiFormatted += formatSummary(truncDOI[i]);
             ffResTxt.push(doiFormatted);
+        }
+        let truncDesire = truncateMsg(proposal.desire);
+        for (let i = 0; i < truncDesire.length; i++) {
+            let desireFormatted = "";
+            if (i === 0) {
+                desireFormatted += "> ### Preferential Outcome\n";
+            }
+            desireFormatted += formatSummary(truncDesire[i]);
+            ffResTxt.push(desireFormatted);
+        }
+    }
+    else if (config_json_1.peerResolutionClasses.indexOf(proposal.kind) == 6) {
+        let truncDecisionSummary = truncateMsg(proposal.summary);
+        for (let i = 0; i < truncDecisionSummary.length; i++) {
+            let decisionSummaryFormatted = "";
+            if (i === 0) {
+                decisionSummaryFormatted += "> ### Summary of Decision\n";
+            }
+            decisionSummaryFormatted += formatSummary(truncDecisionSummary[i]);
+            ffResTxt.push(decisionSummaryFormatted);
         }
         let truncDesire = truncateMsg(proposal.desire);
         for (let i = 0; i < truncDesire.length; i++) {

@@ -1,6 +1,6 @@
 import { Client, Guild, Events, ButtonBuilder, ActionRowBuilder, ButtonStyle, GuildMember, GuildBasedChannel, ChannelType } from "discord.js";
 import { resChan, guildId, peerId, yes, no, abstain } from "../config.json";
-import { VoterObject } from "../structures";
+import { VoterObject, ProposalObject } from "../structures";
 import cron from "node-cron";
 import * as qman from "../cogs/queue-manager.js";
 import * as frm from "../cogs/formatter.js";
@@ -13,22 +13,7 @@ export default {
 	async execute(client: Client<true>) {
 		console.log(`Ready! Logged in as ${client.user.tag}`);
 
-		interface proposalInterface {
-			user: string;
-			submitted: number;
-			kind: string;
-			active: boolean;
-			votemsg: number;
-			startdate: number;
-			subject: undefined;
-			details: undefined;
-			summary: undefined;
-			desire: undefined;
-			eligiblevoters: object[];
-			tallymsg: string;
-		}
-
-		async function closeActive(activeResolution: proposalInterface) {
+		async function closeActive(activeResolution: ProposalObject) {
 			// Determine if server and channel are available
 			const getServer: void | Guild = await client.guilds.fetch(guildId);
 			const getChannel: null | GuildBasedChannel = await getServer.channels.fetch(resChan);
@@ -43,12 +28,10 @@ export default {
 					let startDate = activeResolution["startdate"];
 					let formatDate = dayjs.unix(startDate).format("YYYY-MM-DD");
 					let finalMsg = frm.finalTally(<VoterObject[]>activeResolution["eligiblevoters"], formatDate, proposalThreshold!)
-
-					let tallyMsg = await getChannel.messages.fetch(activeResolution["tallymsg"]);
-					await tallyMsg.delete()
-					.then(async () => await getChannel!.send(finalMsg));
-					qman.changeProperty(activeResolution["user"], "active", false);
-					qman.removeFrmQueue(activeResolution["user"]);
+						let tallyMsg = await getChannel.messages.fetch(activeResolution["tallymsg"]);
+						await tallyMsg.delete().then(async () => await getChannel!.send(finalMsg));
+						qman.changeProperty(activeResolution["user"], "active", false);
+						qman.removeFrmQueue(activeResolution["user"]);
 				}
 			}
 		}

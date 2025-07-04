@@ -2,14 +2,8 @@ import { yes, no, abstain, absent } from "../config.json";
 
 export function kindToStr(elem: string) {
     switch(elem) {
-        case "amd_admin":
-            return "Amendment of Administrative Charter";
-        case "amd_rp":
-            return "Amendment of RP Charter";
-        case "amd_format":
-            return "Amendment of Formatting Guidelines";
-        case "amd_community":
-            return "Amendment of Community Guidelines";
+        case "amd_official":
+            return "Amendment of Official Document(s)";
         case "app_member":
             return "Application for Membership";
         case "app_peer":
@@ -20,17 +14,15 @@ export function kindToStr(elem: string) {
             return "Injunction on Roleplay Action";
         case "inj_member":
             return "Injunction on User Behavior";
+        case "gen_decision":
+            return "General Peer Decision";
     }
 }
 export function determineThreshold(elem: string) {
     switch(elem) {
-        case "amd_admin":
-            return 2/3;
-        case "amd_rp":
-            return 2/3;
-        case "amd_format":
-            return 2/3;
-        case "amd_community":
+        case "gen_decision":
+            return 1/2;
+        case "amd_official":
             return 2/3;
         case "app_member":
             return 1/2;

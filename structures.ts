@@ -9,6 +9,7 @@ export class ProposalObject {
     kind: string;
     active: boolean;
     votemsg: string;
+    tallymsg: string;
     startdate: number;
     enddate: number;
     eligiblevoters: VoterObject[];

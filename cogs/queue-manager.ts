@@ -46,14 +46,14 @@ export function addToQueue(element: object) {
 
     return "Your proposal has been successfully added to the queue. You can see all items in the queue with `/queue view`.";
 }
-export function removeFrmQueue(user: string) {
+export function removeFrmQueue(user: string, admin: boolean = false) {
     // Need to make sure the queue exists and then store it as an object
     let qAsObj = fetchQueue();
     let qItems = qAsObj["queue"]
 
     const isActive = qItems.filter((proposal: ProposalObject) => proposal["user"] == user)
     if (isActive.length > 0) {
-        if (isActive[0].active === true) {
+        if (isActive[0].active === true && admin === false) {
             return "You cannot remove an active item from the queue."
         } else {
             const result = qItems.filter((proposal: ProposalObject) => proposal["user"] != user)

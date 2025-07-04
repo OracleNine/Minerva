@@ -35,21 +35,13 @@ export default {
                         .setPlaceholder("Make a selection!")
                         .addOptions(
                             new StringSelectMenuOptionBuilder()
-                                .setLabel("Amendent of Administrative Charter")
+                                .setLabel("Amendent of Official Document(s)")
                                 .setDescription("THRESHOLD: 2/3")
-                                .setValue("amd_admin"),
+                                .setValue("amd_official"),
                             new StringSelectMenuOptionBuilder()
-                                .setLabel("Amendent of Roleplay Charter")
-                                .setDescription("THRESHOLD: 2/3")
-                                .setValue("amd_rp"),
-                            new StringSelectMenuOptionBuilder()
-                                .setLabel("Amendent of Formatting Guidelines")
-                                .setDescription("THRESHOLD: 2/3")
-                                .setValue("amd_format"),
-                            new StringSelectMenuOptionBuilder()
-                                .setLabel("Amendent of Community Guidelines")
-                                .setDescription("THRESHOLD: 2/3")
-                                .setValue("amd_community"),
+                                .setLabel("General Peer Decision")
+                                .setDescription("THRESHOLD: 1/2 + ε")
+                                .setValue("gen_decision"),
                             new StringSelectMenuOptionBuilder()
                                 .setLabel("Application for Membership")
                                 .setDescription("THRESHOLD: 1/2 + ε")
@@ -69,7 +61,7 @@ export default {
                             new StringSelectMenuOptionBuilder()
                                 .setLabel("Injunction on User Behavior")
                                 .setDescription("THRESHOLD: 1/2 + ε")
-                                .setValue("inj_member"),
+                                .setValue("inj_member")
                         );
 
                         // Send this menu to the user as a message

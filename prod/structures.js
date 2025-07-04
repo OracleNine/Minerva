@@ -7,6 +7,7 @@ class ProposalObject {
     kind;
     active;
     votemsg;
+    tallymsg;
     startdate;
     enddate;
     eligiblevoters;

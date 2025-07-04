@@ -63,11 +63,11 @@ exports.default = {
         else if (interaction.isModalSubmit()) {
             if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) !== -1) {
                 // Make sure the modal is one of the peer resolution classes
-                const newProposal = new structures_js_1.ProposalObject();
-                if (!(interaction.member instanceof discord_js_1.GuildMember)) {
-                    await interaction.reply("Could not find Guild Member");
+                if (!(interaction.member instanceof discord_js_1.GuildMember) || !(interaction.member.roles.cache.has(config_json_1.peerId))) {
+                    await interaction.reply("Submission failed. Make sure you are doing this channel on the TCH server, and that you are a Peer.");
                 }
                 else {
+                    const newProposal = new structures_js_1.ProposalObject();
                     newProposal.user = interaction.member.id;
                     newProposal.submitted = (0, dayjs_1.default)().unix();
                     newProposal.kind = interaction.customId;
@@ -77,18 +77,23 @@ exports.default = {
                     newProposal.enddate = 0;
                     let newEligibleVotersArray = [];
                     newProposal.eligiblevoters = newEligibleVotersArray;
-                    if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) >= 0 && config_json_1.peerResolutionClasses.indexOf(interaction.customId) <= 3) {
+                    if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) == 0) {
                         newProposal.subject = interaction.fields.getTextInputValue("amendmentTitle");
                         newProposal.summary = interaction.fields.getTextInputValue("amendmentSummary");
                         newProposal.details = interaction.fields.getTextInputValue("amendmentDetails1") + interaction.fields.getTextInputValue("amendmentDetails2");
                     }
-                    else if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) == 4 || config_json_1.peerResolutionClasses.indexOf(interaction.customId) == 5) {
+                    else if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) == 1 || config_json_1.peerResolutionClasses.indexOf(interaction.customId) == 2) {
                         newProposal.subject = interaction.fields.getTextInputValue("appSubject");
                     }
-                    else if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) >= 6 && config_json_1.peerResolutionClasses.indexOf(interaction.customId) <= 8) {
+                    else if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) >= 3 && config_json_1.peerResolutionClasses.indexOf(interaction.customId) <= 5) {
                         newProposal.subject = interaction.fields.getTextInputValue("injSubject");
                         newProposal.details = interaction.fields.getTextInputValue("injDesc");
                         newProposal.desire = interaction.fields.getTextInputValue("injOut");
+                    }
+                    else if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) == 6) {
+                        newProposal.subject = interaction.fields.getTextInputValue("decisionTitle");
+                        newProposal.summary = interaction.fields.getTextInputValue("decisionSummary");
+                        newProposal.desire = interaction.fields.getTextInputValue("decisionDetails1") + interaction.fields.getTextInputValue("decisionDetails2");
                     }
                     let result = qman.addToQueue(newProposal);
                     await interaction.reply({ content: result, flags: discord_js_1.MessageFlags.Ephemeral });
@@ -100,11 +105,10 @@ exports.default = {
             // if someone is choosing a proposal class, show the appropriate modal
             if (interaction.customId === "proposalSelect") {
                 let modalTitle = kts.kindToStr(interaction.values[0]); // Convert the kind of resolution into a string that we can use to set the title of the modal
-                // If the user selected an amendment of an official document
                 if (modalTitle == undefined) {
                     await interaction.reply({ content: "There was an issue creating the modal, contact Oracle ASAP.", flags: discord_js_1.MessageFlags.Ephemeral });
                 }
-                else if (config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) <= 3) {
+                else if (config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) == 0) {
                     const modal = new discord_js_1.ModalBuilder()
                         .setCustomId(interaction.values[0])
                         .setTitle(modalTitle);
@@ -140,7 +144,7 @@ exports.default = {
                     await interaction.showModal(modal);
                     // Check if the proposal is an application of membership or peerage
                 }
-                else if (config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) == 4 || config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) == 5) {
+                else if (config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) == 1 || config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) == 2) {
                     // Make sure this is the Chair, because they are the only one who can make these kinds of proposals
                     if (interaction.member instanceof discord_js_1.GuildMember && interaction.member.roles.cache.has(config_json_1.chairId)) {
                         // Now make the modal
@@ -161,7 +165,7 @@ exports.default = {
                         await interaction.reply({ content: "You are not the Chair!", flags: discord_js_1.MessageFlags.Ephemeral });
                     }
                 }
-                else if (config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) >= 6) {
+                else if (config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) >= 3 && config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) <= 5) {
                     // Now make the modal
                     const modal = new discord_js_1.ModalBuilder()
                         .setCustomId(interaction.values[0])
@@ -188,6 +192,41 @@ exports.default = {
                     const appFirstRow = new discord_js_1.ActionRowBuilder().addComponents(injunctionDesc);
                     const appSecondRow = new discord_js_1.ActionRowBuilder().addComponents(injunctionOutcome);
                     modal.addComponents(appZeroRow, appFirstRow, appSecondRow);
+                    await interaction.showModal(modal);
+                }
+                else if (config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) == 6) {
+                    const modal = new discord_js_1.ModalBuilder()
+                        .setCustomId(interaction.values[0])
+                        .setTitle(modalTitle);
+                    const decisionTitle = new discord_js_1.TextInputBuilder()
+                        .setCustomId('decisionTitle')
+                        .setLabel("Subject")
+                        .setPlaceholder("The title of the general decision.")
+                        .setStyle(discord_js_1.TextInputStyle.Short);
+                    const decisionSummaryInput = new discord_js_1.TextInputBuilder()
+                        .setCustomId('decisionSummary')
+                        .setLabel("Summary")
+                        .setPlaceholder("A summary of the decision you would like to make.")
+                        .setStyle(discord_js_1.TextInputStyle.Paragraph)
+                        .setMaxLength(650);
+                    const decisionDetails1 = new discord_js_1.TextInputBuilder()
+                        .setCustomId('decisionDetails1')
+                        .setLabel("Details")
+                        .setPlaceholder("Explain, in full detail, the decision and how it will be implemented.")
+                        .setStyle(discord_js_1.TextInputStyle.Paragraph);
+                    const decisionDetails2 = new discord_js_1.TextInputBuilder()
+                        .setCustomId('decisionDetails2')
+                        .setLabel("Details (cont.)")
+                        .setPlaceholder("Use this in case you hit the character limit on the box above. Leave this space blank if not needed.")
+                        .setStyle(discord_js_1.TextInputStyle.Paragraph)
+                        .setRequired(false);
+                    const decisionZeroRow = new discord_js_1.ActionRowBuilder().addComponents(decisionTitle);
+                    const decisionFirstRow = new discord_js_1.ActionRowBuilder().addComponents(decisionSummaryInput);
+                    const decisionSecondRow = new discord_js_1.ActionRowBuilder().addComponents(decisionDetails1);
+                    const decisionThirdRow = new discord_js_1.ActionRowBuilder().addComponents(decisionDetails2);
+                    // Add inputs to the modal
+                    modal.addComponents(decisionZeroRow, decisionFirstRow, decisionSecondRow, decisionThirdRow);
+                    // Show the modal to the user
                     await interaction.showModal(modal);
                 }
             }
@@ -230,7 +269,7 @@ exports.default = {
                                 const dateFormatted = dayjs_1.default.unix(activeResolution["startdate"]).format("YYYY-MM-DD");
                                 let newTallyMsg = frm.formatTally(withoutThisPeer, dateFormatted);
                                 let tallyMsg = await interaction.channel.messages.fetch(tallyMsgId);
-                                await tallyMsg.edit(newTallyMsg);
+                                await tallyMsg.edit(newTallyMsg).catch(console.error);
                             }
                         }
                     }
