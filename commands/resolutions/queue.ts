@@ -35,7 +35,7 @@ export default {
                         .setPlaceholder("Make a selection!")
                         .addOptions(
                             new StringSelectMenuOptionBuilder()
-                                .setLabel("Amendent of Official Document(s)")
+                                .setLabel("Amendment of Official Document(s)")
                                 .setDescription("THRESHOLD: 2/3")
                                 .setValue("amd_official"),
                             new StringSelectMenuOptionBuilder()
