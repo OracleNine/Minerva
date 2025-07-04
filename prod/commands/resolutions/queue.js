@@ -62,7 +62,7 @@ exports.default = {
                         .setCustomId("proposalSelect")
                         .setPlaceholder("Make a selection!")
                         .addOptions(new discord_js_1.StringSelectMenuOptionBuilder()
-                        .setLabel("Amendent of Official Document(s)")
+                        .setLabel("Amendment of Official Document(s)")
                         .setDescription("THRESHOLD: 2/3")
                         .setValue("amd_official"), new discord_js_1.StringSelectMenuOptionBuilder()
                         .setLabel("General Peer Decision")
