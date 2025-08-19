@@ -195,7 +195,7 @@ FINAL TALLY
     eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
 
     for (let i = 0; i < eligiblePeers.length; i++) {
-        let stripPrefix = eligiblePeers[i]!.name.substring(4, eligiblePeers[i]!.name.length);
+        let stripPrefix = eligiblePeers[i]!.name.substring(5, eligiblePeers[i]!.name.length);
         tallyBody += kts.voterStateToEmoji(eligiblePeers[i]!.voter_state) + ` \`` + stripPrefix + `\`\n`;
         if (eligiblePeers[i]!.voter_state === 1) {
             votedYes++;
