@@ -15,7 +15,7 @@ export function snip(arr: string[], value: string) {
 }
 export function formatHeader(kind: string, subject: string, author: string, date: string) {
     let resClass= kts.kindToStr(kind);
-    author = author.substring(4, author.length);
+    author = author.substring(5, author.length);
     let header = `\`\`\`ini
 [PEER RESOLUTION] ${date}\n
     CLASS: ${resClass}
@@ -164,7 +164,7 @@ export function formatTally(eligiblePeers: VoterObject[], currentDate: string) {
     let votedAbstain = 0;
     eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
     for (let i = 0; i < eligiblePeers.length; i++) {
-        let stripPrefix = eligiblePeers[i]!.name.substring(4, eligiblePeers[i]!.name.length);
+        let stripPrefix = eligiblePeers[i]!.name.substring(5, eligiblePeers[i]!.name.length);
         tallyBody += kts.voterStateToEmoji(eligiblePeers[i]!.voter_state) + ` \`` + stripPrefix + `\`\n`;
         if (eligiblePeers[i]!.voter_state === 1) {
             votedYes++;
