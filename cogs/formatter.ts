@@ -102,10 +102,8 @@ export function generateResMsg(proposal: ProposalObject) {
         let firstHeading = "### Summary of Amendment\n";
         let secondHeading = "### Details of Amendment\n";
 
-        let fullSummaryText = "";
-        fullSummaryText += firstHeading;
-        fullSummaryText += proposal.summary
-        fullResolutionText.push(addIndent(fullSummaryText));
+        let fullSummaryText = tfi(proposal.summary, firstHeading);
+        fullResolutionText.push(... fullSummaryText);
 
         // Render details
         let detailsChunks = truncateMsg(proposal.details);
@@ -137,10 +135,8 @@ export function generateResMsg(proposal: ProposalObject) {
         let firstHeading = "### Summary of Resolution\n";
         let secondHeading = "### Description of Resolution\n";
 
-        let fullSummaryText = "";
-        fullSummaryText += firstHeading;
-        fullSummaryText = addIndent(proposal.summary);
-        fullResolutionText.push(fullSummaryText);
+        let fullSummaryText = tfi(proposal.summary, firstHeading);
+        fullResolutionText.push(... fullSummaryText);
 
         let descriptionOfResolution = tfi(proposal.details, secondHeading);
         fullResolutionText.push(...descriptionOfResolution);
