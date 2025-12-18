@@ -34,6 +34,8 @@ export function determineThreshold(elem: string) {
             return 1/2;
         case "inj_member":
             return 1/2;
+        default:
+            return 0;
     }
 }
 export function determineVoterState(elem: string) {
@@ -58,5 +60,15 @@ export function voterStateToEmoji(elem: number) {
             return `<:abstain:${abstain}>`;
         case 0:
             return`<:void:${absent}>`;
+    }
+}
+export function thresholdToString(threshold: number) {
+    switch(threshold) {
+        case 2/3:
+            return "2/3";
+        case 1/2:
+            return "1/2 + ε";
+        default: 
+            return "Could not determine threshold";
     }
 }

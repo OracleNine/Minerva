@@ -265,7 +265,7 @@ export default {
 								// We also need to update the tally message
 								let tallyMsgId = activeResolution["tallymsg"];
 								const dateFormatted = dayjs.unix(activeResolution["startdate"]).format("YYYY-MM-DD");
-								let newTallyMsg = frm.formatTally(withoutThisPeer, dateFormatted);
+								let newTallyMsg = frm.finalTally(withoutThisPeer, dateFormatted, 0);
 								let tallyMsg = await interaction.channel.messages.fetch(tallyMsgId);
 								await tallyMsg.edit(newTallyMsg).catch(console.error);
 							}

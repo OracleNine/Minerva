@@ -33,7 +33,6 @@ export function formatDetails(details: string) {
 
     for (let i = 0; i < lineBy.length; i++) {
         let line = lineBy[i];
-        console.log(line);
 
         if (line!.search(/^[+-].*/) == -1 && line !== "" && line !== "\t") {
             if (inCodeBlock) {
@@ -78,8 +77,7 @@ export function truncateMsg(text: string) {
         return txtArr;
     }
 }
-export function tfi(details: string, heading: string): string[] {
-    // TFI = truncate, format, indent
+export function truncateFormatIndent(details: string, heading: string): string[] {
     let finalChunks = [];
     let detailsChunks = truncateMsg(details);
     if (detailsChunks !== undefined) {
@@ -102,7 +100,7 @@ export function generateResMsg(proposal: ProposalObject) {
         let firstHeading = "### Summary of Amendment\n";
         let secondHeading = "### Details of Amendment\n";
 
-        let fullSummaryText = tfi(proposal.summary, firstHeading);
+        let fullSummaryText = truncateFormatIndent(proposal.summary, firstHeading);
         fullResolutionText.push(... fullSummaryText);
 
         // Render details
@@ -124,21 +122,21 @@ export function generateResMsg(proposal: ProposalObject) {
         let secondHeading = "### Preferential Outcome\n";
 
         // Render description of incident
-        let descriptionOfIncident = tfi(proposal.details, firstHeading);
+        let descriptionOfIncident = truncateFormatIndent(proposal.details, firstHeading);
         fullResolutionText.push(...descriptionOfIncident);
 
         // Render preferential outcome
-        let preferentialOutcome = tfi(proposal.desire, secondHeading);
+        let preferentialOutcome = truncateFormatIndent(proposal.desire, secondHeading);
         fullResolutionText.push(...preferentialOutcome);
 
     } else if (proposal.kind === "gen_decision") {
         let firstHeading = "### Summary of Resolution\n";
         let secondHeading = "### Description of Resolution\n";
 
-        let fullSummaryText = tfi(proposal.summary, firstHeading);
+        let fullSummaryText = truncateFormatIndent(proposal.summary, firstHeading);
         fullResolutionText.push(... fullSummaryText);
 
-        let descriptionOfResolution = tfi(proposal.details, secondHeading);
+        let descriptionOfResolution = truncateFormatIndent(proposal.details, secondHeading);
         fullResolutionText.push(...descriptionOfResolution);
 
     }
@@ -153,16 +151,14 @@ export function sortVoters(a: VoterObject,b: VoterObject) {
         return 0;
     }
 }
-export function formatTally(eligiblePeers: VoterObject[], currentDate: string) {
-    let tallyHeader = `\`\`\`ini
-[PEER RESOLUTION] ${currentDate}
-🔴 LIVE TALLY
-\`\`\`\n`
+export function finalTally(eligiblePeers: VoterObject[], currentDate: string, threshold: number) {
+    // If passed threshold is 0, then the vote is assumed to be still ongoing
     let tallyBody = "";
     let votedYes = 0;
     let votedNo = 0;
     let votedAbstain = 0;
-    eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
+    eligiblePeers = eligiblePeers.sort(sortVoters);
+
     for (let i = 0; i < eligiblePeers.length; i++) {
         let stripPrefix = eligiblePeers[i]!.name.substring(5, eligiblePeers[i]!.name.length);
         tallyBody += kts.voterStateToEmoji(eligiblePeers[i]!.voter_state) + ` \`` + stripPrefix + `\`\n`;
@@ -174,53 +170,34 @@ export function formatTally(eligiblePeers: VoterObject[], currentDate: string) {
             votedAbstain++;
         }
     }
-    let tallyFooter = `\n\`\`\`
+    let tallyHeader = "";
+    let tallyFooter = "";
+    if (threshold > 0) {
+        let votePercentage = votedYes / (votedYes + votedNo);
+        let resultString = "";
+        if (votePercentage > threshold) {
+            resultString = "RESOLUTION PASSES";
+        } else {
+            resultString = "RESOLUTION FAILS";
+        }
+        tallyFooter = `\n\`\`\`
       YES: ${votedYes}
        NO: ${votedNo}
   ABSTAIN: ${votedAbstain}
 \`\`\``
-
-    let tallyMsg = tallyHeader + tallyBody + tallyFooter;
-    return tallyMsg;
-}
-export function finalTally(eligiblePeers: VoterObject[], currentDate: string, threshold: number) {
-    let tallyHeader = `\`\`\`ini
+        tallyHeader = `\`\`\`ini
 [PEER RESOLUTION] ${currentDate}
 FINAL TALLY
 \`\`\`\n`
-    let tallyBody = "";
-    let votedYes = 0;
-    let votedNo = 0;
-    let votedAbstain = 0;
-    eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
-
-    for (let i = 0; i < eligiblePeers.length; i++) {
-        let stripPrefix = eligiblePeers[i]!.name.substring(5, eligiblePeers[i]!.name.length);
-        tallyBody += kts.voterStateToEmoji(eligiblePeers[i]!.voter_state) + ` \`` + stripPrefix + `\`\n`;
-        if (eligiblePeers[i]!.voter_state === 1) {
-            votedYes++;
-        } else if (eligiblePeers[i]!.voter_state === 2) {
-            votedNo++;
-        } else if (eligiblePeers[i]!.voter_state === 3) {
-            votedAbstain++;
-        }
-    }
-    
-    let votePercentage = votedYes / (votedYes + votedNo);
-    let resultString = "";
-    if (votePercentage > threshold) {
-        resultString = "RESOLUTION PASSES";
-    } else {
-        resultString = "RESOLUTION FAILS";
-    }
-    let tallyFooter = `\n\`\`\`
-      YES: ${votedYes}
-       NO: ${votedNo}
-  ABSTAIN: ${votedAbstain}
-\`\`\`
-\`\`\`
+        tallyFooter += `\`\`\`
    RESULT: ${resultString}
 \`\`\``
+    } else {
+        tallyHeader = `\`\`\`ini
+[PEER RESOLUTION] ${currentDate}
+🔴 LIVE TALLY
+\`\`\`\n`
+    }
     let tallyMsg = tallyHeader + tallyBody + tallyFooter;
     return tallyMsg;
 
@@ -234,7 +211,6 @@ module.exports = {
     formatDetails,
     generateResMsg,
     snip,
-    formatTally,
     finalTally,
     sortQueue
 }

@@ -4,6 +4,7 @@ exports.kindToStr = kindToStr;
 exports.determineThreshold = determineThreshold;
 exports.determineVoterState = determineVoterState;
 exports.voterStateToEmoji = voterStateToEmoji;
+exports.thresholdToString = thresholdToString;
 const config_json_1 = require("../config.json");
 function kindToStr(elem) {
     switch (elem) {
@@ -39,6 +40,8 @@ function determineThreshold(elem) {
             return 1 / 2;
         case "inj_member":
             return 1 / 2;
+        default:
+            return 0;
     }
 }
 function determineVoterState(elem) {
@@ -63,6 +66,16 @@ function voterStateToEmoji(elem) {
             return `<:abstain:${config_json_1.abstain}>`;
         case 0:
             return `<:void:${config_json_1.absent}>`;
+    }
+}
+function thresholdToString(threshold) {
+    switch (threshold) {
+        case 2 / 3:
+            return "2/3";
+        case 1 / 2:
+            return "1/2 + ε";
+        default:
+            return "Could not determine threshold";
     }
 }
 //# sourceMappingURL=kindtostr.js.map

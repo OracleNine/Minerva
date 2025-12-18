@@ -27,7 +27,7 @@ export default {
 					let proposalThreshold = kts.determineThreshold(proposalType);
 					let startDate = activeResolution["startdate"];
 					let formatDate = dayjs.unix(startDate).format("YYYY-MM-DD");
-					let finalMsg = frm.finalTally(<VoterObject[]>activeResolution["eligiblevoters"], formatDate, proposalThreshold!)
+					let finalMsg = frm.finalTally(<VoterObject[]>activeResolution["eligiblevoters"], formatDate, proposalThreshold!);
 						let tallyMsg = await getChannel.messages.fetch(activeResolution["tallymsg"]);
 						await tallyMsg.delete().then(async () => await getChannel!.send(finalMsg));
 						qman.changeProperty(activeResolution["user"], "active", false);
@@ -124,59 +124,58 @@ export default {
 									}
 
 									let threshold = kts.determineThreshold(startResolution.kind);
-									let thresholdAsStr = "";
-									if (threshold === 2/3) {
-										thresholdAsStr = "2/3";
-									} else if (threshold === 1/2) {
-										thresholdAsStr = "1/2 + ε";
-									}
-								// Send the vote message. Obtain its ID and save it to the proposal object
+									if (threshold === 0) {
+										console.error("Could not determine threshold.");
+									} else {
+										let thresholdAsStr = kts.thresholdToString(threshold);
+									// Send the vote message. Obtain its ID and save it to the proposal object
 
-									const yesButton = new ButtonBuilder()
-										.setCustomId("vote_yes")
-										.setEmoji(`<:yes:${yes}>`)
-										.setLabel(`YES`)
-										.setStyle(ButtonStyle.Secondary);
-									
-									const noButton = new ButtonBuilder()
-										.setCustomId("vote_no")
-										.setEmoji(`<:no:${no}>`)
-										.setLabel(`NO`)
-										.setStyle(ButtonStyle.Secondary);
-									
-									const abstainButton = new ButtonBuilder()
-										.setCustomId("vote_abstain")
-										.setEmoji(`<:abstain:${abstain}>`)
-										.setLabel(`ABSTAIN`)
-										.setStyle(ButtonStyle.Secondary);
+										const yesButton = new ButtonBuilder()
+											.setCustomId("vote_yes")
+											.setEmoji(`<:yes:${yes}>`)
+											.setLabel(`YES`)
+											.setStyle(ButtonStyle.Secondary);
+										
+										const noButton = new ButtonBuilder()
+											.setCustomId("vote_no")
+											.setEmoji(`<:no:${no}>`)
+											.setLabel(`NO`)
+											.setStyle(ButtonStyle.Secondary);
+										
+										const abstainButton = new ButtonBuilder()
+											.setCustomId("vote_abstain")
+											.setEmoji(`<:abstain:${abstain}>`)
+											.setLabel(`ABSTAIN`)
+											.setStyle(ButtonStyle.Secondary);
 
-									const vote_row = new ActionRowBuilder<ButtonBuilder>()
-										.addComponents(yesButton, noButton, abstainButton);
+										const vote_row = new ActionRowBuilder<ButtonBuilder>()
+											.addComponents(yesButton, noButton, abstainButton);
 
-									const sendVote = await getChannel.send({
-										content: `\`\`\`
+										const sendVote = await getChannel.send({
+											content: `\`\`\`
 THRESHOLD: ${thresholdAsStr}
 \`\`\``,
-										components: [vote_row]
-									});
+											components: [vote_row]
+										});
 
-									let today = dayjs();
+										let today = dayjs();
 
-									startResolution["active"] = true;
-									startResolution["startdate"] = today.unix();
-									const deadline = today.add(3, "day").unix();
-									startResolution["enddate"] = deadline;
-									startResolution["votemsg"] = sendVote.id;
-									startResolution["eligiblevoters"] = eligiblePeers;
+										startResolution["active"] = true;
+										startResolution["startdate"] = today.unix();
+										const deadline = today.add(3, "day").unix();
+										startResolution["enddate"] = deadline;
+										startResolution["votemsg"] = sendVote.id;
+										startResolution["eligiblevoters"] = eligiblePeers;
 
-									let tallyMessage = frm.formatTally(<VoterObject[]>eligiblePeers, today.format("YYYY-MM-DD"));
-									let sendTallyMsg = await getChannel.send(tallyMessage);
-									
-									startResolution["tallymsg"] = sendTallyMsg.id;
+										let tallyMessage = frm.finalTally(<VoterObject[]>eligiblePeers, today.format("YYYY-MM-DD"), 0);
+										let sendTallyMsg = await getChannel.send(tallyMessage);
+										
+										startResolution["tallymsg"] = sendTallyMsg.id;
 
-									// Update the queue object
-									qman.removeFrmQueue(startResolution.user);
-									qman.addToQueue(startResolution);
+										// Update the queue object
+										qman.removeFrmQueue(startResolution.user);
+										qman.addToQueue(startResolution);
+									}
 								}
 
 							} catch(err) {

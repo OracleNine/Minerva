@@ -38,10 +38,9 @@ exports.formatHeader = formatHeader;
 exports.formatDetails = formatDetails;
 exports.addIndent = addIndent;
 exports.truncateMsg = truncateMsg;
-exports.tfi = tfi;
+exports.truncateFormatIndent = truncateFormatIndent;
 exports.generateResMsg = generateResMsg;
 exports.sortVoters = sortVoters;
-exports.formatTally = formatTally;
 exports.finalTally = finalTally;
 exports.sortQueue = sortQueue;
 const kts = __importStar(require("../cogs/kindtostr.js"));
@@ -75,7 +74,6 @@ function formatDetails(details) {
     let inCodeBlock = false;
     for (let i = 0; i < lineBy.length; i++) {
         let line = lineBy[i];
-        console.log(line);
         if (line.search(/^[+-].*/) == -1 && line !== "" && line !== "\t") {
             if (inCodeBlock) {
                 finalDetails += "```\n";
@@ -113,13 +111,12 @@ function addIndent(text) {
 function truncateMsg(text) {
     // Text display components have a char limit of 2000. To avoid running into errors, this function splits up the message into 1800 char chunks
     // which is returned as an array. The bot can then iterate through that array until all parts of the message have been sent.
-    const txtArr = text.match(/.{1,1000}(?:\n|$)/gs);
+    const txtArr = text.match(/.{1,1800}(?:\n|$)/gs);
     if (txtArr !== null && typeof txtArr !== undefined) {
         return txtArr;
     }
 }
-function tfi(details, heading) {
-    // TFI = truncate, format, indent
+function truncateFormatIndent(details, heading) {
     let finalChunks = [];
     let detailsChunks = truncateMsg(details);
     if (detailsChunks !== undefined) {
@@ -140,10 +137,8 @@ function generateResMsg(proposal) {
     if (proposal.kind === "amd_official") {
         let firstHeading = "### Summary of Amendment\n";
         let secondHeading = "### Details of Amendment\n";
-        let fullSummaryText = "";
-        fullSummaryText += firstHeading;
-        fullSummaryText += proposal.summary;
-        fullResolutionText.push(addIndent(fullSummaryText));
+        let fullSummaryText = truncateFormatIndent(proposal.summary, firstHeading);
+        fullResolutionText.push(...fullSummaryText);
         // Render details
         let detailsChunks = truncateMsg(proposal.details);
         if (detailsChunks !== undefined) {
@@ -163,20 +158,18 @@ function generateResMsg(proposal) {
         let firstHeading = "### Description of Incident\n";
         let secondHeading = "### Preferential Outcome\n";
         // Render description of incident
-        let descriptionOfIncident = tfi(proposal.details, firstHeading);
+        let descriptionOfIncident = truncateFormatIndent(proposal.details, firstHeading);
         fullResolutionText.push(...descriptionOfIncident);
         // Render preferential outcome
-        let preferentialOutcome = tfi(proposal.desire, secondHeading);
+        let preferentialOutcome = truncateFormatIndent(proposal.desire, secondHeading);
         fullResolutionText.push(...preferentialOutcome);
     }
     else if (proposal.kind === "gen_decision") {
         let firstHeading = "### Summary of Resolution\n";
         let secondHeading = "### Description of Resolution\n";
-        let fullSummaryText = "";
-        fullSummaryText += firstHeading;
-        fullSummaryText = addIndent(proposal.summary);
-        fullResolutionText.push(fullSummaryText);
-        let descriptionOfResolution = tfi(proposal.details, secondHeading);
+        let fullSummaryText = truncateFormatIndent(proposal.summary, firstHeading);
+        fullResolutionText.push(...fullSummaryText);
+        let descriptionOfResolution = truncateFormatIndent(proposal.details, secondHeading);
         fullResolutionText.push(...descriptionOfResolution);
     }
     return fullResolutionText;
@@ -192,11 +185,8 @@ function sortVoters(a, b) {
         return 0;
     }
 }
-function formatTally(eligiblePeers, currentDate) {
-    let tallyHeader = `\`\`\`ini
-[PEER RESOLUTION] ${currentDate}
-🔴 LIVE TALLY
-\`\`\`\n`;
+function finalTally(eligiblePeers, currentDate, threshold) {
+    // If passed threshold is 0, then the vote is assumed to be still ongoing
     let tallyBody = "";
     let votedYes = 0;
     let votedNo = 0;
@@ -215,53 +205,36 @@ function formatTally(eligiblePeers, currentDate) {
             votedAbstain++;
         }
     }
-    let tallyFooter = `\n\`\`\`
+    let tallyHeader = "";
+    let tallyFooter = "";
+    if (threshold > 0) {
+        let votePercentage = votedYes / (votedYes + votedNo);
+        let resultString = "";
+        if (votePercentage > threshold) {
+            resultString = "RESOLUTION PASSES";
+        }
+        else {
+            resultString = "RESOLUTION FAILS";
+        }
+        tallyFooter = `\n\`\`\`
       YES: ${votedYes}
        NO: ${votedNo}
   ABSTAIN: ${votedAbstain}
 \`\`\``;
-    let tallyMsg = tallyHeader + tallyBody + tallyFooter;
-    return tallyMsg;
-}
-function finalTally(eligiblePeers, currentDate, threshold) {
-    let tallyHeader = `\`\`\`ini
+        tallyHeader = `\`\`\`ini
 [PEER RESOLUTION] ${currentDate}
 FINAL TALLY
 \`\`\`\n`;
-    let tallyBody = "";
-    let votedYes = 0;
-    let votedNo = 0;
-    let votedAbstain = 0;
-    eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
-    for (let i = 0; i < eligiblePeers.length; i++) {
-        let stripPrefix = eligiblePeers[i].name.substring(5, eligiblePeers[i].name.length);
-        tallyBody += kts.voterStateToEmoji(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;
-        if (eligiblePeers[i].voter_state === 1) {
-            votedYes++;
-        }
-        else if (eligiblePeers[i].voter_state === 2) {
-            votedNo++;
-        }
-        else if (eligiblePeers[i].voter_state === 3) {
-            votedAbstain++;
-        }
-    }
-    let votePercentage = votedYes / (votedYes + votedNo);
-    let resultString = "";
-    if (votePercentage > threshold) {
-        resultString = "RESOLUTION PASSES";
-    }
-    else {
-        resultString = "RESOLUTION FAILS";
-    }
-    let tallyFooter = `\n\`\`\`
-      YES: ${votedYes}
-       NO: ${votedNo}
-  ABSTAIN: ${votedAbstain}
-\`\`\`
-\`\`\`
+        tallyFooter += `\`\`\`
    RESULT: ${resultString}
 \`\`\``;
+    }
+    else {
+        tallyHeader = `\`\`\`ini
+[PEER RESOLUTION] ${currentDate}
+🔴 LIVE TALLY
+\`\`\`\n`;
+    }
     let tallyMsg = tallyHeader + tallyBody + tallyFooter;
     return tallyMsg;
 }
@@ -274,7 +247,6 @@ module.exports = {
     formatDetails,
     generateResMsg,
     snip,
-    formatTally,
     finalTally,
     sortQueue
 };

@@ -159,50 +159,49 @@ exports.default = {
                                         eligiblePeers.push(usrObj);
                                     }
                                     let threshold = kts.determineThreshold(startResolution.kind);
-                                    let thresholdAsStr = "";
-                                    if (threshold === 2 / 3) {
-                                        thresholdAsStr = "2/3";
+                                    if (threshold === 0) {
+                                        console.error("Could not determine threshold.");
                                     }
-                                    else if (threshold === 1 / 2) {
-                                        thresholdAsStr = "1/2 + ε";
-                                    }
-                                    // Send the vote message. Obtain its ID and save it to the proposal object
-                                    const yesButton = new discord_js_1.ButtonBuilder()
-                                        .setCustomId("vote_yes")
-                                        .setEmoji(`<:yes:${config_json_1.yes}>`)
-                                        .setLabel(`YES`)
-                                        .setStyle(discord_js_1.ButtonStyle.Secondary);
-                                    const noButton = new discord_js_1.ButtonBuilder()
-                                        .setCustomId("vote_no")
-                                        .setEmoji(`<:no:${config_json_1.no}>`)
-                                        .setLabel(`NO`)
-                                        .setStyle(discord_js_1.ButtonStyle.Secondary);
-                                    const abstainButton = new discord_js_1.ButtonBuilder()
-                                        .setCustomId("vote_abstain")
-                                        .setEmoji(`<:abstain:${config_json_1.abstain}>`)
-                                        .setLabel(`ABSTAIN`)
-                                        .setStyle(discord_js_1.ButtonStyle.Secondary);
-                                    const vote_row = new discord_js_1.ActionRowBuilder()
-                                        .addComponents(yesButton, noButton, abstainButton);
-                                    const sendVote = await getChannel.send({
-                                        content: `\`\`\`
+                                    else {
+                                        let thresholdAsStr = kts.thresholdToString(threshold);
+                                        // Send the vote message. Obtain its ID and save it to the proposal object
+                                        const yesButton = new discord_js_1.ButtonBuilder()
+                                            .setCustomId("vote_yes")
+                                            .setEmoji(`<:yes:${config_json_1.yes}>`)
+                                            .setLabel(`YES`)
+                                            .setStyle(discord_js_1.ButtonStyle.Secondary);
+                                        const noButton = new discord_js_1.ButtonBuilder()
+                                            .setCustomId("vote_no")
+                                            .setEmoji(`<:no:${config_json_1.no}>`)
+                                            .setLabel(`NO`)
+                                            .setStyle(discord_js_1.ButtonStyle.Secondary);
+                                        const abstainButton = new discord_js_1.ButtonBuilder()
+                                            .setCustomId("vote_abstain")
+                                            .setEmoji(`<:abstain:${config_json_1.abstain}>`)
+                                            .setLabel(`ABSTAIN`)
+                                            .setStyle(discord_js_1.ButtonStyle.Secondary);
+                                        const vote_row = new discord_js_1.ActionRowBuilder()
+                                            .addComponents(yesButton, noButton, abstainButton);
+                                        const sendVote = await getChannel.send({
+                                            content: `\`\`\`
 THRESHOLD: ${thresholdAsStr}
 \`\`\``,
-                                        components: [vote_row]
-                                    });
-                                    let today = (0, dayjs_1.default)();
-                                    startResolution["active"] = true;
-                                    startResolution["startdate"] = today.unix();
-                                    const deadline = today.add(3, "day").unix();
-                                    startResolution["enddate"] = deadline;
-                                    startResolution["votemsg"] = sendVote.id;
-                                    startResolution["eligiblevoters"] = eligiblePeers;
-                                    let tallyMessage = frm.formatTally(eligiblePeers, today.format("YYYY-MM-DD"));
-                                    let sendTallyMsg = await getChannel.send(tallyMessage);
-                                    startResolution["tallymsg"] = sendTallyMsg.id;
-                                    // Update the queue object
-                                    qman.removeFrmQueue(startResolution.user);
-                                    qman.addToQueue(startResolution);
+                                            components: [vote_row]
+                                        });
+                                        let today = (0, dayjs_1.default)();
+                                        startResolution["active"] = true;
+                                        startResolution["startdate"] = today.unix();
+                                        const deadline = today.add(3, "day").unix();
+                                        startResolution["enddate"] = deadline;
+                                        startResolution["votemsg"] = sendVote.id;
+                                        startResolution["eligiblevoters"] = eligiblePeers;
+                                        let tallyMessage = frm.finalTally(eligiblePeers, today.format("YYYY-MM-DD"), 0);
+                                        let sendTallyMsg = await getChannel.send(tallyMessage);
+                                        startResolution["tallymsg"] = sendTallyMsg.id;
+                                        // Update the queue object
+                                        qman.removeFrmQueue(startResolution.user);
+                                        qman.addToQueue(startResolution);
+                                    }
                                 }
                             }
                             catch (err) {
