@@ -1,6 +1,7 @@
 import * as kts from "../cogs/kindtostr.js";
 import { ProposalObject, VoterObject } from "../structures";
 import { peerResolutionClasses } from "../config.json";
+import { truncate } from "node:fs";
 
 export function snip(arr: string[], value: string) {
     let i = 0;
@@ -25,8 +26,6 @@ export function formatHeader(kind: string, subject: string, author: string, date
     return header;
 }
 export function formatDetails(details: string) {
-    // Put inline quotes around this ^[a-zA-Z0-9].+$
-    // Put block quotes around the first and last occurrence of this ^[+|-].*
     let finalDetails = "";
     details = details.replace("`", "");
     let lineBy = details.split("\n");
@@ -34,29 +33,30 @@ export function formatDetails(details: string) {
 
     for (let i = 0; i < lineBy.length; i++) {
         let line = lineBy[i];
+        console.log(line);
 
-        if (line!.search(/^[a-zA-Z0-9].+$/) != -1 && inCodeBlock === false) {
-            finalDetails += "> `" + line + "`\n";
-        } else if (line!.search(/^[a-zA-Z0-9].+$/) != -1 && inCodeBlock === true) {
-            finalDetails += "> ```\n"
-            inCodeBlock = false;
-            finalDetails += "> `" + line + "`\n";
-        } else if (line!.search(/^[+|-].*/) != -1 && inCodeBlock === false) {
-            finalDetails += "> ```diff\n";
-            finalDetails += "> " + line + "\n";
-            inCodeBlock = true;
-        } else if (line!.search(/^[+|-].*/) != -1 && inCodeBlock === true) {
-            finalDetails += "> " + line + "\n";
+        if (line!.search(/^[+-].*/) == -1 && line !== "" && line !== "\t") {
+            if (inCodeBlock) {
+                finalDetails += "```\n";
+                inCodeBlock = false;
+            }
+            finalDetails += "`" + line + "`\n";
+        } else {
+            if (inCodeBlock) {
+                finalDetails += line + "\n";
+            } else {
+                finalDetails += "```diff\n";
+                finalDetails += line + "\n";
+                inCodeBlock = true;
+            }
         }
-
     }
-
-    if (inCodeBlock === true) {
-        finalDetails += "> ```";
+    if (inCodeBlock) {
+        finalDetails += "```";
     }
     return finalDetails;
 }
-export function formatSummary(text: string) {
+export function addIndent(text: string) {
     let finalSummary = "";
     let lineBy = text.split("\n");
 
@@ -73,76 +73,80 @@ export function formatSummary(text: string) {
 export function truncateMsg(text: string) {
     // Text display components have a char limit of 2000. To avoid running into errors, this function splits up the message into 1800 char chunks
     // which is returned as an array. The bot can then iterate through that array until all parts of the message have been sent.
-    text += "\n";
-    let txtArr = text.match(/[\S\s]{1,1800}[\.|\n|\?|\!]/g);
-
-    if (txtArr !== null) {
+    const txtArr = text.match(/.{1,1800}(?:\n|$)/gs);
+    if (txtArr !== null && typeof txtArr !== undefined) {
         return txtArr;
-    } else {
-        return "Unable to regex message, contact Oracle.";
     }
 }
-export function generateResMsg(proposal: ProposalObject) {
-    let ffResTxt = [];
-    if (peerResolutionClasses.indexOf(proposal.kind) == 0) {
-        let truncSummary = truncateMsg(proposal.summary);
-        for (let i = 0; i < truncSummary.length; i++) {
-            let summaryFormatted = "";
+export function tfi(details: string, heading: string): string[] {
+    // TFI = truncate, format, indent
+    let finalChunks = [];
+    let detailsChunks = truncateMsg(details);
+    if (detailsChunks !== undefined) {
+        for (let i = 0; i < detailsChunks.length; i++) {
+            let thisChunk = "";
             if (i === 0) {
-                summaryFormatted += "> ### Summary of Resolution\n";
+                thisChunk += heading;
             }
-            summaryFormatted += formatSummary(truncSummary[i]!);
-            ffResTxt.push(summaryFormatted);
-        }
-        let truncDetails = truncateMsg(proposal.details);
-        for (let i = 0; i < truncDetails.length; i++) {
-            let detailsFormatted = "";
-            if (i === 0) {
-                detailsFormatted += "> ### Details of Resolution\n";
-            }
-            detailsFormatted += formatDetails(truncDetails[i]!);
-            ffResTxt.push(detailsFormatted);
-        }
-    } else if (peerResolutionClasses.indexOf(proposal.kind) >= 3 && peerResolutionClasses.indexOf(proposal.kind) <= 5) {
-        let truncDOI = truncateMsg(proposal.details);
-        for (let i = 0; i < truncDOI.length; i++) {
-            let doiFormatted = "";
-            if (i === 0) {
-                doiFormatted += "> ### Description of Incident\n";
-            }
-            doiFormatted += formatSummary(truncDOI[i]!);
-            ffResTxt.push(doiFormatted);
-        }
-        let truncDesire = truncateMsg(proposal.desire);
-        for (let i = 0; i < truncDesire.length; i++) {
-            let desireFormatted = "";
-            if (i === 0) {
-                desireFormatted += "> ### Preferential Outcome\n";
-            }
-            desireFormatted += formatSummary(truncDesire[i]!);
-            ffResTxt.push(desireFormatted);
-        }
-    } else if (peerResolutionClasses.indexOf(proposal.kind) == 6) {
-        let truncDecisionSummary = truncateMsg(proposal.summary);
-        for (let i = 0; i < truncDecisionSummary.length; i++) {
-            let decisionSummaryFormatted = "";
-            if (i === 0) {
-                decisionSummaryFormatted += "> ### Summary of Decision\n";
-            }
-            decisionSummaryFormatted += formatSummary(truncDecisionSummary[i]!);
-            ffResTxt.push(decisionSummaryFormatted);
-        }
-        let truncDesire = truncateMsg(proposal.desire);
-        for (let i = 0; i < truncDesire.length; i++) {
-            let desireFormatted = "";
-            if (i === 0) {
-                desireFormatted += "> ### Preferential Outcome\n";
-            }
-            desireFormatted += formatSummary(truncDesire[i]!);
-            ffResTxt.push(desireFormatted);
+            let indentedDetails = addIndent(detailsChunks[i]!);
+            thisChunk += indentedDetails;
+            finalChunks.push(thisChunk);
         }
     }
-    return ffResTxt;
+
+    return finalChunks;
+}
+export function generateResMsg(proposal: ProposalObject) {
+    let fullResolutionText: string[] = [];
+    if (proposal.kind === "amd_official") {
+        let firstHeading = "### Summary of Amendment\n";
+        let secondHeading = "### Details of Amendment\n";
+
+        let fullSummaryText = "";
+        fullSummaryText += firstHeading;
+        fullSummaryText += proposal.summary
+        fullResolutionText.push(addIndent(fullSummaryText));
+
+        // Render details
+        let detailsChunks = truncateMsg(proposal.details);
+        if (detailsChunks !== undefined) {
+            for (let i = 0; i < detailsChunks.length; i++) {
+                let thisChunk = "";
+                if (i === 0) {
+                    thisChunk += secondHeading;
+                }
+                let formattedDetails = formatDetails(detailsChunks[i]!);
+                let indentedDetails = addIndent(formattedDetails);
+                thisChunk += indentedDetails;
+                fullResolutionText.push(thisChunk);
+            }
+        }
+    } else if (proposal.kind === "inj_rp" || proposal.kind === "inj_ip" || proposal.kind === "inj_member") {
+        let firstHeading = "### Description of Incident\n";
+        let secondHeading = "### Preferential Outcome\n";
+
+        // Render description of incident
+        let descriptionOfIncident = tfi(proposal.details, firstHeading);
+        fullResolutionText.push(...descriptionOfIncident);
+
+        // Render preferential outcome
+        let preferentialOutcome = tfi(proposal.desire, secondHeading);
+        fullResolutionText.push(...preferentialOutcome);
+
+    } else if (proposal.kind === "gen_decision") {
+        let firstHeading = "### Summary of Resolution\n";
+        let secondHeading = "### Description of Resolution\n";
+
+        let fullSummaryText = "";
+        fullSummaryText += firstHeading;
+        fullSummaryText = addIndent(proposal.summary);
+        fullResolutionText.push(fullSummaryText);
+
+        let descriptionOfResolution = tfi(proposal.details, secondHeading);
+        fullResolutionText.push(...descriptionOfResolution);
+
+    }
+    return fullResolutionText;
 }
 export function sortVoters(a: VoterObject,b: VoterObject) {
     if (a.name < b.name) {

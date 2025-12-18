@@ -87,7 +87,7 @@ exports.default = {
                     }
                     else if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) >= 3 && config_json_1.peerResolutionClasses.indexOf(interaction.customId) <= 5) {
                         newProposal.subject = interaction.fields.getTextInputValue("injSubject");
-                        newProposal.details = interaction.fields.getTextInputValue("injDesc");
+                        newProposal.details = interaction.fields.getTextInputValue("injDesc") + interaction.fields.getTextInputValue("injDesc2");
                         newProposal.desire = interaction.fields.getTextInputValue("injOut");
                     }
                     else if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) == 6) {
@@ -182,6 +182,12 @@ exports.default = {
                         .setPlaceholder("Give a detailed description of the offending behavior.")
                         .setStyle(discord_js_1.TextInputStyle.Paragraph)
                         .setRequired(true);
+                    const injunctionDesc2 = new discord_js_1.TextInputBuilder()
+                        .setCustomId("injDesc2")
+                        .setLabel("Description of Incident")
+                        .setPlaceholder("Description of Incident (cont.) Leave blank if not needed.")
+                        .setStyle(discord_js_1.TextInputStyle.Paragraph)
+                        .setRequired(false);
                     const injunctionOutcome = new discord_js_1.TextInputBuilder()
                         .setCustomId("injOut")
                         .setLabel("Preferential Outcome")
@@ -190,8 +196,9 @@ exports.default = {
                         .setRequired(true);
                     const appZeroRow = new discord_js_1.ActionRowBuilder().addComponents(injunctionSubject);
                     const appFirstRow = new discord_js_1.ActionRowBuilder().addComponents(injunctionDesc);
-                    const appSecondRow = new discord_js_1.ActionRowBuilder().addComponents(injunctionOutcome);
-                    modal.addComponents(appZeroRow, appFirstRow, appSecondRow);
+                    const appSecondRow = new discord_js_1.ActionRowBuilder().addComponents(injunctionDesc2);
+                    const appThirdRow = new discord_js_1.ActionRowBuilder().addComponents(injunctionOutcome);
+                    modal.addComponents(appZeroRow, appFirstRow, appSecondRow, appThirdRow);
                     await interaction.showModal(modal);
                 }
                 else if (config_json_1.peerResolutionClasses.indexOf(interaction.values[0]) == 6) {
@@ -202,18 +209,21 @@ exports.default = {
                         .setCustomId('decisionTitle')
                         .setLabel("Subject")
                         .setPlaceholder("The title of the general decision.")
-                        .setStyle(discord_js_1.TextInputStyle.Short);
+                        .setStyle(discord_js_1.TextInputStyle.Short)
+                        .setRequired(true);
                     const decisionSummaryInput = new discord_js_1.TextInputBuilder()
                         .setCustomId('decisionSummary')
                         .setLabel("Summary")
                         .setPlaceholder("A summary of the decision you would like to make.")
                         .setStyle(discord_js_1.TextInputStyle.Paragraph)
-                        .setMaxLength(650);
+                        .setMaxLength(650)
+                        .setRequired(true);
                     const decisionDetails1 = new discord_js_1.TextInputBuilder()
                         .setCustomId('decisionDetails1')
                         .setLabel("Details")
                         .setPlaceholder("Explain, in full detail, the decision and how it will be implemented.")
-                        .setStyle(discord_js_1.TextInputStyle.Paragraph);
+                        .setStyle(discord_js_1.TextInputStyle.Paragraph)
+                        .setRequired(true);
                     const decisionDetails2 = new discord_js_1.TextInputBuilder()
                         .setCustomId('decisionDetails2')
                         .setLabel("Details (cont.)")

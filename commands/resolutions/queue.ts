@@ -112,11 +112,11 @@ export default {
                 }
 
                 let queueMsgArray = frm.truncateMsg(codeProposal);
-                let firstQueueMsg = `\`\`\`ini\n` + queueMsgArray[0] + `\`\`\``
+                let firstQueueMsg = `\`\`\`ini\n` + queueMsgArray![0] + `\`\`\``
                 await interaction.reply({ content: firstQueueMsg });
-                if (queueMsgArray.length > 1) {
-                    for (let i = 1; i < queueMsgArray.length; i++) {
-                        let subsQueueMsg = `\`\`\`ini\n` + queueMsgArray[i] + `\`\`\``
+                if (queueMsgArray!.length > 1) {
+                    for (let i = 1; i < queueMsgArray!.length; i++) {
+                        let subsQueueMsg = `\`\`\`ini\n` + queueMsgArray![i] + `\`\`\``
                         await interaction.followUp({ content: subsQueueMsg})
                     }
                 }

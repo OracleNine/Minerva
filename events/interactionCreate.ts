@@ -52,7 +52,7 @@ export default {
 						newProposal.subject = interaction.fields.getTextInputValue("appSubject");
 					} else if (peerResolutionClasses.indexOf(interaction.customId) >= 3 && peerResolutionClasses.indexOf(interaction.customId) <= 5) {
 						newProposal.subject = interaction.fields.getTextInputValue("injSubject");
-						newProposal.details = interaction.fields.getTextInputValue("injDesc");
+						newProposal.details = interaction.fields.getTextInputValue("injDesc") + interaction.fields.getTextInputValue("injDesc2");
 						newProposal.desire = interaction.fields.getTextInputValue("injOut");
 					} else if (peerResolutionClasses.indexOf(interaction.customId) == 6) {
 						newProposal.subject = interaction.fields.getTextInputValue("decisionTitle");
@@ -132,7 +132,7 @@ export default {
 							.setLabel("Subject")
 							.setPlaceholder("Username of the person you would like to promote.")
 							.setStyle(TextInputStyle.Short)
-							.setRequired(true)
+							.setRequired(true);
 						
 						const appZeroRow = new ActionRowBuilder<TextInputBuilder>().addComponents(applicationSubject);
 						
@@ -161,20 +161,28 @@ export default {
 						.setLabel("Description of Incident")
 						.setPlaceholder("Give a detailed description of the offending behavior.")
 						.setStyle(TextInputStyle.Paragraph)
-						.setRequired(true)
+						.setRequired(true);
+
+					const injunctionDesc2 = new TextInputBuilder()
+						.setCustomId("injDesc2")
+						.setLabel("Description of Incident")
+						.setPlaceholder("Description of Incident (cont.) Leave blank if not needed.")
+						.setStyle(TextInputStyle.Paragraph)
+						.setRequired(false);
 
 					const injunctionOutcome = new TextInputBuilder()
 						.setCustomId("injOut")
 						.setLabel("Preferential Outcome")
 						.setPlaceholder("How do you think the situation should be handled?")
 						.setStyle(TextInputStyle.Paragraph)
-						.setRequired(true)
+						.setRequired(true);
 					
 					const appZeroRow = new ActionRowBuilder<TextInputBuilder>().addComponents(injunctionSubject);
 					const appFirstRow = new ActionRowBuilder<TextInputBuilder>().addComponents(injunctionDesc);
-					const appSecondRow = new ActionRowBuilder<TextInputBuilder>().addComponents(injunctionOutcome);
+					const appSecondRow = new ActionRowBuilder<TextInputBuilder>().addComponents(injunctionDesc2);
+					const appThirdRow = new ActionRowBuilder<TextInputBuilder>().addComponents(injunctionOutcome);
 					
-					modal.addComponents(appZeroRow, appFirstRow, appSecondRow);
+					modal.addComponents(appZeroRow, appFirstRow, appSecondRow, appThirdRow);
 
 					await interaction.showModal(modal);
 				} else if (peerResolutionClasses.indexOf(interaction.values[0]!) == 6) {
@@ -186,20 +194,23 @@ export default {
 						.setCustomId('decisionTitle')
 						.setLabel("Subject")
 						.setPlaceholder("The title of the general decision.")
-						.setStyle(TextInputStyle.Short);
+						.setStyle(TextInputStyle.Short)
+						.setRequired(true);
 
 					const decisionSummaryInput = new TextInputBuilder()
 						.setCustomId('decisionSummary')
 						.setLabel("Summary")
 						.setPlaceholder("A summary of the decision you would like to make.")
 						.setStyle(TextInputStyle.Paragraph)
-						.setMaxLength(650);
+						.setMaxLength(650)
+						.setRequired(true);
 
 					const decisionDetails1 = new TextInputBuilder()
 						.setCustomId('decisionDetails1')
 						.setLabel("Details")
 						.setPlaceholder("Explain, in full detail, the decision and how it will be implemented.")
-						.setStyle(TextInputStyle.Paragraph);
+						.setStyle(TextInputStyle.Paragraph)
+						.setRequired(true);
 					
 					const decisionDetails2 = new TextInputBuilder()
 						.setCustomId('decisionDetails2')
