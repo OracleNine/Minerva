@@ -69,12 +69,37 @@ export function addIndent(text: string) {
     return finalSummary;
 
 }  
-export function truncateMsg(text: string) {
-    // Text display components have a char limit of 2000. To avoid running into errors, this function splits up the message into 1800 char chunks
-    // which is returned as an array. The bot can then iterate through that array until all parts of the message have been sent.
-    const txtArr = text.match(/.{1,1800}(?:\n|$)/gs);
-    if (txtArr !== null && typeof txtArr !== undefined) {
-        return txtArr;
+export function truncateMsg(text: string, isDetails: boolean) {
+    // /^[+-][^\r\n]{1000,}/m
+    // /.{1,1800}(?:\.|\?|\!|\;|\,$)/gs
+    let returnChunks = [];
+    if (text.length < 1800) {
+        returnChunks.push(text);
+        return returnChunks;
+    } else {
+        if (isDetails) {
+            while (text.matchAll(/^[+-][^\r\n]{1000,}/gmd).next().value !== undefined) {
+                let runOnResult: any = text.matchAll(/^[+-][^\r\n]{1000,}/gmd).next().value;
+                let runOnCoordinates = runOnResult.indices[0];
+                let runOn = text.substring(runOnCoordinates[0], runOnCoordinates[1]);
+
+                let toFirstPunctuation = runOn.matchAll(/^[+-].{0,1000}[\.|\?|\!]/gmd);
+                if (toFirstPunctuation === null) {
+                    toFirstPunctuation = runOn.matchAll(/^[+-].{0,1000}/gmd);
+                }
+                let toPunctuationEndCoord = toFirstPunctuation.next().value.indices[0][1];
+
+                let plusOrMinus = "\n";
+
+                if (runOn.match(/^[+]/gmd) !== null) {
+                    plusOrMinus += "+";
+                } else {
+                    plusOrMinus += "-";
+                }
+
+                text = text.slice(0, runOnCoordinates[0] + toPunctuationEndCoord) + plusOrMinus + text.slice(runOnCoordinates[0] + toPunctuationEndCoord);
+            }
+        }
     }
 }
 export function truncateFormatIndent(details: string, heading: string): string[] {
