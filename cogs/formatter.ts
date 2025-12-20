@@ -90,11 +90,15 @@ export function truncateMsg(text: string, isDetails: boolean) {
                 let runOnCoordinates = runOnResult.indices[0];
                 let runOn = text.substring(runOnCoordinates[0], runOnCoordinates[1]);
 
-                let toFirstPunctuation: any = runOn.matchAll(/^[+-].{0,1000}[\.|\?|\!]/gmd);
-                if (toFirstPunctuation === null) {
-                    toFirstPunctuation = runOn.matchAll(/^[+-].{0,1000}/gmd);
+                let endAt: any = runOn.matchAll(/^[+-].{0,1000}[\.|\?|\!]/gmd).next().value;
+                if (endAt === undefined || endAt === null) {
+                    endAt = runOn.matchAll(/^[+-].{0,1000}[\s]/gmd).next().value;
+                    if (endAt === undefined || endAt === null) {
+                        endAt = new Object();
+                        endAt.indices = [[0, 1000], null];
+                    }
                 }
-                let toPunctuationEndCoord = toFirstPunctuation.next().value.indices[0][1];
+                let endCoord = endAt.indices[0][1];
 
                 let plusOrMinus = "\n";
 
@@ -104,7 +108,7 @@ export function truncateMsg(text: string, isDetails: boolean) {
                     plusOrMinus += "-";
                 }
 
-                text = text.slice(0, runOnCoordinates[0] + toPunctuationEndCoord) + plusOrMinus + text.slice(runOnCoordinates[0] + toPunctuationEndCoord);
+                text = text.slice(0, runOnCoordinates[0] + endCoord) + plusOrMinus + text.slice(runOnCoordinates[0] + endCoord);
             }
         }
         while (text.length > 1800) {
