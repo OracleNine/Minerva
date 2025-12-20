@@ -89,7 +89,7 @@ export default {
 								if (!(getAuthor instanceof GuildMember)) {
 									console.log("Could not find that member.");
 								} else {
-									const getNow = dayjs().format("YYYY-MM-DD");
+									const getNow = dayjs();
 									let header = frm.formatHeader(startResolution.kind, startResolution.subject, getAuthor.displayName, getNow);
 
 

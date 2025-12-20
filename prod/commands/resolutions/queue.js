@@ -32,12 +32,15 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
 const config_json_1 = require("../../config.json");
 const qman = __importStar(require("../../cogs/queue-manager.js"));
-const kts = __importStar(require("../../cogs/kindtostr.js"));
 const frm = __importStar(require("../../cogs/formatter.js"));
+const dayjs_1 = __importDefault(require("dayjs"));
 exports.default = {
     data: new discord_js_1.SlashCommandBuilder()
         .setName('queue')
@@ -117,20 +120,17 @@ exports.default = {
                     for (let i = 0; i < qItems.length; i++) {
                         // Iterate through each item in the queue and format it
                         let item = qItems[i];
-                        const getUser = await getServer.members.fetch(item.user); // This gets the nickname rather than the username
-                        let stripPrefix = getUser.displayName.substring(4, getUser.displayName.length);
-                        codeProposal += `[POSITION: ${i}]\n`;
-                        codeProposal += `    CLASS: ${kts.kindToStr(item.kind)}\n`;
-                        codeProposal += `  SUBJECT: ${item.subject}\n`;
-                        codeProposal += `   AUTHOR: ${stripPrefix}\n`;
+                        const getUser = await getServer.members.fetch(item.user);
+                        let getDisplayName = getUser.displayName;
+                        codeProposal += frm.formatHeader(item.kind, item.subject, getDisplayName, dayjs_1.default.unix(item.submitted), i);
                     }
                 }
                 let queueMsgArray = frm.truncateMsg(codeProposal, false);
-                let firstQueueMsg = `\`\`\`ini\n` + queueMsgArray[0] + `\`\`\``;
+                let firstQueueMsg = queueMsgArray[0];
                 await interaction.reply({ content: firstQueueMsg });
                 if (queueMsgArray.length > 1) {
                     for (let i = 1; i < queueMsgArray.length; i++) {
-                        let subsQueueMsg = `\`\`\`ini\n` + queueMsgArray[i] + `\`\`\``;
+                        let subsQueueMsg = queueMsgArray[i];
                         await interaction.followUp({ content: subsQueueMsg });
                     }
                 }

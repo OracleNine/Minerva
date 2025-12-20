@@ -130,7 +130,7 @@ exports.default = {
                                     console.log("Could not find that member.");
                                 }
                                 else {
-                                    const getNow = (0, dayjs_1.default)().format("YYYY-MM-DD");
+                                    const getNow = (0, dayjs_1.default)();
                                     let header = frm.formatHeader(startResolution.kind, startResolution.subject, getAuthor.displayName, getNow);
                                     // Post the vote-msg and add reactions
                                     await getChannel.send(`<@&${config_json_1.peerId}>\n` + header);

@@ -2,6 +2,7 @@ import * as kts from "../cogs/kindtostr.js";
 import { ProposalObject, VoterObject } from "../structures";
 import { peerResolutionClasses } from "../config.json";
 import { truncate } from "node:fs";
+import { Dayjs } from "dayjs";
 
 export function snip(arr: string[], value: string) {
     let i = 0;
@@ -14,15 +15,20 @@ export function snip(arr: string[], value: string) {
     }
     return arr;
 }
-export function formatHeader(kind: string, subject: string, author: string, date: string) {
+export function formatHeader(kind: string, subject: string, author: string, date: Dayjs, position?: number) {
     let resClass= kts.kindToStr(kind);
+    let formatDate = date.format("YYYY-MM-DD");
     author = author.substring(5, author.length);
-    let header = `\`\`\`ini
-[PEER RESOLUTION] ${date}\n
-    CLASS: ${resClass}
-  SUBJECT: ${subject}
-   AUTHOR: ${author}
-\`\`\``
+    let header = `\`\`\`ini\n`
+    if (position !== undefined) {
+        header += `[POSITION: ${position}]\n`;
+    } else {
+        header += `[PEER RESOLUTION] ${formatDate}\n\n`;
+    }
+    header += `    CLASS: ${resClass}\n`;
+    header +=`  SUBJECT: ${subject}\n`;
+    header+=`   AUTHOR: ${author}\n`;
+    header+= `\`\`\``;
     return header;
 }
 export function formatDetails(details: string) {

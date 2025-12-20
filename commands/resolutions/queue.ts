@@ -4,6 +4,7 @@ import { ProposalObject } from "../../structures";
 import * as qman from "../../cogs/queue-manager.js";
 import * as kts from "../../cogs/kindtostr.js";
 import * as frm from "../../cogs/formatter.js";
+import dayjs from "dayjs";
 
 export default {
 	data: new SlashCommandBuilder()
@@ -103,21 +104,18 @@ export default {
                     for (let i = 0; i < qItems.length; i++) {
                         // Iterate through each item in the queue and format it
                         let item = qItems[i];
-                        const getUser = await getServer.members.fetch(item.user); // This gets the nickname rather than the username
-                        let stripPrefix = getUser.displayName.substring(4, getUser.displayName.length);
-                        codeProposal += `[POSITION: ${i}]\n`
-                        codeProposal += `    CLASS: ${kts.kindToStr(item.kind)}\n`
-                        codeProposal += `  SUBJECT: ${item.subject}\n`
-                        codeProposal += `   AUTHOR: ${stripPrefix}\n`
+                        const getUser = await getServer.members.fetch(item.user);
+                        let getDisplayName = getUser.displayName;
+                        codeProposal += frm.formatHeader(item.kind, item.subject, getDisplayName, dayjs.unix(item.submitted), i);
                     }
                 }
 
                 let queueMsgArray = frm.truncateMsg(codeProposal, false);
-                let firstQueueMsg = `\`\`\`ini\n` + queueMsgArray![0] + `\`\`\``
+                let firstQueueMsg = queueMsgArray![0]
                 await interaction.reply({ content: firstQueueMsg });
                 if (queueMsgArray!.length > 1) {
                     for (let i = 1; i < queueMsgArray!.length; i++) {
-                        let subsQueueMsg = `\`\`\`ini\n` + queueMsgArray![i] + `\`\`\``
+                        let subsQueueMsg = queueMsgArray![i]
                         await interaction.followUp({ content: subsQueueMsg})
                     }
                 }

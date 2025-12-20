@@ -56,15 +56,21 @@ function snip(arr, value) {
     }
     return arr;
 }
-function formatHeader(kind, subject, author, date) {
+function formatHeader(kind, subject, author, date, position) {
     let resClass = kts.kindToStr(kind);
+    let formatDate = date.format("YYYY-MM-DD");
     author = author.substring(5, author.length);
-    let header = `\`\`\`ini
-[PEER RESOLUTION] ${date}\n
-    CLASS: ${resClass}
-  SUBJECT: ${subject}
-   AUTHOR: ${author}
-\`\`\``;
+    let header = `\`\`\`ini\n`;
+    if (position !== undefined) {
+        header += `[POSITION: ${position}]\n`;
+    }
+    else {
+        header += `[PEER RESOLUTION] ${formatDate}\n\n`;
+    }
+    header += `    CLASS: ${resClass}\n`;
+    header += `  SUBJECT: ${subject}\n`;
+    header += `   AUTHOR: ${author}\n`;
+    header += `\`\`\``;
     return header;
 }
 function formatDetails(details) {
