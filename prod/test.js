@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 let text = `
 He has affected to render the Military independent of and superior to the Civil power.
 
@@ -41,39 +43,33 @@ while (text.matchAll(/^[+-][^\r\n]{1000,}/gmd).next().value !== undefined) {
     let runOnResult = text.matchAll(/^[+-][^\r\n]{1000,}/gmd).next().value;
     let runOnCoordinates = runOnResult.indices[0];
     let runOn = text.substring(runOnCoordinates[0], runOnCoordinates[1]);
-
     let toFirstPunctuation = runOn.matchAll(/^[+-].{0,1000}[\.|\?|\!]/gmd);
     if (toFirstPunctuation === null) {
         toFirstPunctuation = runOn.matchAll(/^[+-].{0,1000}/gmd);
     }
     let toPunctuationEndCoord = toFirstPunctuation.next().value.indices[0][1];
-
     let plusOrMinus = "\n";
-
     if (runOn.match(/^[+]/g) !== null) {
         plusOrMinus += "+";
-    } else {
+    }
+    else {
         plusOrMinus += "-";
     }
-
     text = text.slice(0, runOnCoordinates[0] + toPunctuationEndCoord) + plusOrMinus + text.slice(runOnCoordinates[0] + toPunctuationEndCoord);
 }
-
 function lastIndexOfRegex(expression, target) {
     let lastIndex = -1;
     for (const match of target.matchAll(expression)) {
         lastIndex = match.index;
     }
-
     return lastIndex;
 }
-
 let returnChunks = [];
 while (text.length > 1800) {
     let toCharLimit = text.substring(0, 1800);
     let chunkEnd = toCharLimit.lastIndexOf("\n");
     if (chunkEnd <= 0) {
-        chunkEnd = lastIndexOfRegex(/\.|\!|\?/gm, toCharLimit)
+        chunkEnd = lastIndexOfRegex(/\.|\!|\?/gm, toCharLimit);
         if (chunkEnd <= 0) {
             chunkEnd = lastIndexOfRegex(/\s/gm, toCharLimit);
             if (chunkEnd <= 0) {
@@ -83,9 +79,8 @@ while (text.length > 1800) {
     }
     let newChunk = text.substring(0, chunkEnd);
     returnChunks.push(newChunk);
-
     text = text.slice(chunkEnd);
 }
 returnChunks.push(text);
-
 console.log(returnChunks);
+//# sourceMappingURL=test.js.map

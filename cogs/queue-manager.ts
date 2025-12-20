@@ -118,3 +118,12 @@ export function changeProperty(user: string, property: string, value: string | n
         }
     }
 }
+export function clearQueue() {
+    let qAsObj = {"queue": []};
+    let qAsStr = JSON.stringify(qAsObj);
+    try {
+        fs.writeFileSync("./queue.json", qAsStr);
+    } catch (err) {
+        console.error(err);
+    }
+}

@@ -108,17 +108,64 @@ function addIndent(text) {
     }
     return finalSummary;
 }
-function truncateMsg(text) {
-    // Text display components have a char limit of 2000. To avoid running into errors, this function splits up the message into 1800 char chunks
-    // which is returned as an array. The bot can then iterate through that array until all parts of the message have been sent.
-    const txtArr = text.match(/.{1,1800}(?:\n|$)/gs);
-    if (txtArr !== null && typeof txtArr !== undefined) {
-        return txtArr;
+function lastIndexOfRegex(expression, target) {
+    let lastIndex = -1;
+    for (const match of target.matchAll(expression)) {
+        lastIndex = match.index;
     }
+    return lastIndex + 1;
+}
+function truncateMsg(text, isDetails) {
+    // /^[+-][^\r\n]{1000,}/m
+    // /.{1,1800}(?:\.|\?|\!|\;|\,$)/gs
+    let returnChunks = [];
+    if (text.length < 1800) {
+        returnChunks.push(text);
+    }
+    else {
+        if (isDetails) {
+            while (text.matchAll(/^[+-][^\r\n]{1000,}/gmd).next().value !== undefined) {
+                let runOnResult = text.matchAll(/^[+-][^\r\n]{1000,}/gmd).next().value;
+                let runOnCoordinates = runOnResult.indices[0];
+                let runOn = text.substring(runOnCoordinates[0], runOnCoordinates[1]);
+                let toFirstPunctuation = runOn.matchAll(/^[+-].{0,1000}[\.|\?|\!]/gmd);
+                if (toFirstPunctuation === null) {
+                    toFirstPunctuation = runOn.matchAll(/^[+-].{0,1000}/gmd);
+                }
+                let toPunctuationEndCoord = toFirstPunctuation.next().value.indices[0][1];
+                let plusOrMinus = "\n";
+                if (runOn.match(/^[+]/g) !== null) {
+                    plusOrMinus += "+";
+                }
+                else {
+                    plusOrMinus += "-";
+                }
+                text = text.slice(0, runOnCoordinates[0] + toPunctuationEndCoord) + plusOrMinus + text.slice(runOnCoordinates[0] + toPunctuationEndCoord);
+            }
+        }
+        while (text.length > 1800) {
+            let toCharLimit = text.substring(0, 1800);
+            let chunkEnd = toCharLimit.lastIndexOf("\n");
+            if (chunkEnd <= 0) {
+                chunkEnd = lastIndexOfRegex(/\.|\!|\?/gm, toCharLimit);
+                if (chunkEnd <= 0) {
+                    chunkEnd = lastIndexOfRegex(/\s/gm, toCharLimit);
+                    if (chunkEnd <= 0) {
+                        chunkEnd = 1800;
+                    }
+                }
+            }
+            let newChunk = text.substring(0, chunkEnd);
+            returnChunks.push(newChunk);
+            text = text.slice(chunkEnd);
+        }
+        returnChunks.push(text);
+    }
+    return returnChunks;
 }
 function truncateFormatIndent(details, heading) {
     let finalChunks = [];
-    let detailsChunks = truncateMsg(details);
+    let detailsChunks = truncateMsg(details, false);
     if (detailsChunks !== undefined) {
         for (let i = 0; i < detailsChunks.length; i++) {
             let thisChunk = "";
@@ -140,7 +187,7 @@ function generateResMsg(proposal) {
         let fullSummaryText = truncateFormatIndent(proposal.summary, firstHeading);
         fullResolutionText.push(...fullSummaryText);
         // Render details
-        let detailsChunks = truncateMsg(proposal.details);
+        let detailsChunks = truncateMsg(proposal.details, true);
         if (detailsChunks !== undefined) {
             for (let i = 0; i < detailsChunks.length; i++) {
                 let thisChunk = "";
@@ -169,7 +216,7 @@ function generateResMsg(proposal) {
         let secondHeading = "### Description of Resolution\n";
         let fullSummaryText = truncateFormatIndent(proposal.summary, firstHeading);
         fullResolutionText.push(...fullSummaryText);
-        let descriptionOfResolution = truncateFormatIndent(proposal.details, secondHeading);
+        let descriptionOfResolution = truncateFormatIndent(proposal.desire, secondHeading);
         fullResolutionText.push(...descriptionOfResolution);
     }
     return fullResolutionText;
@@ -191,7 +238,7 @@ function finalTally(eligiblePeers, currentDate, threshold) {
     let votedYes = 0;
     let votedNo = 0;
     let votedAbstain = 0;
-    eligiblePeers = eligiblePeers.sort(sortVoters); // Voters will always be displayed alphabetically
+    eligiblePeers = eligiblePeers.sort(sortVoters);
     for (let i = 0; i < eligiblePeers.length; i++) {
         let stripPrefix = eligiblePeers[i].name.substring(5, eligiblePeers[i].name.length);
         tallyBody += kts.voterStateToEmoji(eligiblePeers[i].voter_state) + ` \`` + stripPrefix + `\`\n`;

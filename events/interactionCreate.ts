@@ -31,7 +31,7 @@ export default {
 				// Make sure the modal is one of the peer resolution classes
 
 				if (!(interaction.member instanceof GuildMember) || !(interaction.member.roles.cache.has(peerId))) {
-					await interaction.reply("Submission failed. Make sure you are doing this channel on the TCH server, and that you are a Peer.");
+					await interaction.reply("Submission failed.");
 				} else {
 					const newProposal = new ProposalObject();
 					newProposal.user  = interaction.member.id;

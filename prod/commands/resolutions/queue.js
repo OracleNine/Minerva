@@ -45,7 +45,7 @@ exports.default = {
         .addStringOption(option => option.setName('action')
         .setDescription("What do you want to do?")
         .setRequired(true)
-        .addChoices({ name: 'Propose', value: 'q_propose' }, { name: 'Remove', value: 'q_remove' }, { name: 'View', value: 'q_view' })),
+        .addChoices({ name: 'Propose', value: 'q_propose' }, { name: 'Remove', value: 'q_remove' }, { name: 'View', value: 'q_view' }, { name: 'Clear', value: 'q_clear' })),
     async execute(interaction) {
         const category = interaction.options.getString('action');
         if (!(interaction.inCachedGuild()) || !interaction.member.roles.cache.has(config_json_1.peerId)) {
@@ -125,7 +125,7 @@ exports.default = {
                         codeProposal += `   AUTHOR: ${stripPrefix}\n`;
                     }
                 }
-                let queueMsgArray = frm.truncateMsg(codeProposal);
+                let queueMsgArray = frm.truncateMsg(codeProposal, false);
                 let firstQueueMsg = `\`\`\`ini\n` + queueMsgArray[0] + `\`\`\``;
                 await interaction.reply({ content: firstQueueMsg });
                 if (queueMsgArray.length > 1) {
@@ -133,6 +133,15 @@ exports.default = {
                         let subsQueueMsg = `\`\`\`ini\n` + queueMsgArray[i] + `\`\`\``;
                         await interaction.followUp({ content: subsQueueMsg });
                     }
+                }
+            }
+            else if (category === "q_clear") {
+                if (!interaction.member.roles.cache.has(config_json_1.chairId)) {
+                    await interaction.reply({ content: "No permission.", flags: discord_js_1.MessageFlags.Ephemeral });
+                }
+                else {
+                    qman.clearQueue();
+                    await interaction.reply({ content: "Queue has been wiped.", flags: discord_js_1.MessageFlags.Ephemeral });
                 }
             }
         }

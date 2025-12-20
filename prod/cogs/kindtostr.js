@@ -41,7 +41,7 @@ function determineThreshold(elem) {
         case "inj_member":
             return 1 / 2;
         default:
-            return 0;
+            return -1;
     }
 }
 function determineVoterState(elem) {

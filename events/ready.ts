@@ -124,7 +124,7 @@ export default {
 									}
 
 									let threshold = kts.determineThreshold(startResolution.kind);
-									if (threshold === 0) {
+									if (threshold === -1) {
 										console.error("Could not determine threshold.");
 									} else {
 										let thresholdAsStr = kts.thresholdToString(threshold);
@@ -178,8 +178,9 @@ THRESHOLD: ${thresholdAsStr}
 									}
 								}
 
-							} catch(err) {
-								console.error("Could not post resolution, removing it from the queue..." + err);
+							} catch(err: any) {
+								console.error("Could not post resolution, removing it from the queue...");
+								console.error(err);
 								qman.removeFrmQueue(startResolution.user);
 								return;
 							}

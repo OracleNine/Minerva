@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, MessageFlags, ChatInputCommandInteraction } from "discord.js";
-import { peerId, guildId } from "../../config.json";
+import { peerId, guildId, chairId } from "../../config.json";
 import { ProposalObject } from "../../structures";
 import * as qman from "../../cogs/queue-manager.js";
 import * as kts from "../../cogs/kindtostr.js";
@@ -17,6 +17,7 @@ export default {
 					{ name: 'Propose', value: 'q_propose' },
 					{ name: 'Remove', value: 'q_remove' },
 					{ name: 'View', value: 'q_view' },
+                    { name: 'Clear', value: 'q_clear'}
 				)),
 	async execute(interaction: ChatInputCommandInteraction<undefined|"cached"|"raw">) {
 		const category = interaction.options.getString('action');
@@ -111,7 +112,7 @@ export default {
                     }
                 }
 
-                let queueMsgArray = frm.truncateMsg(codeProposal);
+                let queueMsgArray = frm.truncateMsg(codeProposal, false);
                 let firstQueueMsg = `\`\`\`ini\n` + queueMsgArray![0] + `\`\`\``
                 await interaction.reply({ content: firstQueueMsg });
                 if (queueMsgArray!.length > 1) {
@@ -119,6 +120,13 @@ export default {
                         let subsQueueMsg = `\`\`\`ini\n` + queueMsgArray![i] + `\`\`\``
                         await interaction.followUp({ content: subsQueueMsg})
                     }
+                }
+            } else if (category === "q_clear") {
+                if (!interaction.member.roles.cache.has(chairId)) {
+                    await interaction.reply({ content: "No permission.", flags: MessageFlags.Ephemeral });
+                } else {
+                    qman.clearQueue();
+                    await interaction.reply({ content: "Queue has been wiped.", flags: MessageFlags.Ephemeral });
                 }
             }
         }

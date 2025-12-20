@@ -35,7 +35,7 @@ export function determineThreshold(elem: string) {
         case "inj_member":
             return 1/2;
         default:
-            return 0;
+            return -1;
     }
 }
 export function determineVoterState(elem: string) {

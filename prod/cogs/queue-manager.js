@@ -10,6 +10,7 @@ exports.findActive = findActive;
 exports.sortQueueByDate = sortQueueByDate;
 exports.findNextProposal = findNextProposal;
 exports.changeProperty = changeProperty;
+exports.clearQueue = clearQueue;
 const node_fs_1 = __importDefault(require("node:fs"));
 // Each entry in the queue has the folowing properties
 // User: ID of the user who submitted the proposal
@@ -115,6 +116,16 @@ function changeProperty(user, property, value) {
         catch (err) {
             console.error(err);
         }
+    }
+}
+function clearQueue() {
+    let qAsObj = { "queue": [] };
+    let qAsStr = JSON.stringify(qAsObj);
+    try {
+        node_fs_1.default.writeFileSync("./queue.json", qAsStr);
+    }
+    catch (err) {
+        console.error(err);
     }
 }
 //# sourceMappingURL=queue-manager.js.map

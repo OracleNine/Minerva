@@ -68,14 +68,21 @@ export function addIndent(text: string) {
 
     return finalSummary;
 
-}  
+}
+function lastIndexOfRegex(expression: RegExp, target: string) {
+    let lastIndex = -1;
+    for (const match of target.matchAll(expression)) {
+        lastIndex = match.index;
+    }
+
+    return lastIndex + 1;
+}
 export function truncateMsg(text: string, isDetails: boolean) {
     // /^[+-][^\r\n]{1000,}/m
     // /.{1,1800}(?:\.|\?|\!|\;|\,$)/gs
     let returnChunks = [];
     if (text.length < 1800) {
         returnChunks.push(text);
-        return returnChunks;
     } else {
         if (isDetails) {
             while (text.matchAll(/^[+-][^\r\n]{1000,}/gmd).next().value !== undefined) {
@@ -83,7 +90,7 @@ export function truncateMsg(text: string, isDetails: boolean) {
                 let runOnCoordinates = runOnResult.indices[0];
                 let runOn = text.substring(runOnCoordinates[0], runOnCoordinates[1]);
 
-                let toFirstPunctuation = runOn.matchAll(/^[+-].{0,1000}[\.|\?|\!]/gmd);
+                let toFirstPunctuation: any = runOn.matchAll(/^[+-].{0,1000}[\.|\?|\!]/gmd);
                 if (toFirstPunctuation === null) {
                     toFirstPunctuation = runOn.matchAll(/^[+-].{0,1000}/gmd);
                 }
@@ -91,7 +98,7 @@ export function truncateMsg(text: string, isDetails: boolean) {
 
                 let plusOrMinus = "\n";
 
-                if (runOn.match(/^[+]/gmd) !== null) {
+                if (runOn.match(/^[+]/g) !== null) {
                     plusOrMinus += "+";
                 } else {
                     plusOrMinus += "-";
@@ -100,11 +107,31 @@ export function truncateMsg(text: string, isDetails: boolean) {
                 text = text.slice(0, runOnCoordinates[0] + toPunctuationEndCoord) + plusOrMinus + text.slice(runOnCoordinates[0] + toPunctuationEndCoord);
             }
         }
+        while (text.length > 1800) {
+            let toCharLimit = text.substring(0, 1800);
+            let chunkEnd = toCharLimit.lastIndexOf("\n");
+            if (chunkEnd <= 0) {
+                chunkEnd = lastIndexOfRegex(/\.|\!|\?/gm, toCharLimit)
+                if (chunkEnd <= 0) {
+                    chunkEnd = lastIndexOfRegex(/\s/gm, toCharLimit);
+                    if (chunkEnd <= 0) {
+                        chunkEnd = 1800;
+                    }
+                }
+            }
+            let newChunk = text.substring(0, chunkEnd);
+            returnChunks.push(newChunk);
+
+            text = text.slice(chunkEnd);
+        }
+        returnChunks.push(text);
     }
+
+    return returnChunks;
 }
 export function truncateFormatIndent(details: string, heading: string): string[] {
     let finalChunks = [];
-    let detailsChunks = truncateMsg(details);
+    let detailsChunks = truncateMsg(details, false);
     if (detailsChunks !== undefined) {
         for (let i = 0; i < detailsChunks.length; i++) {
             let thisChunk = "";
@@ -129,7 +156,7 @@ export function generateResMsg(proposal: ProposalObject) {
         fullResolutionText.push(... fullSummaryText);
 
         // Render details
-        let detailsChunks = truncateMsg(proposal.details);
+        let detailsChunks = truncateMsg(proposal.details, true);
         if (detailsChunks !== undefined) {
             for (let i = 0; i < detailsChunks.length; i++) {
                 let thisChunk = "";
@@ -161,7 +188,7 @@ export function generateResMsg(proposal: ProposalObject) {
         let fullSummaryText = truncateFormatIndent(proposal.summary, firstHeading);
         fullResolutionText.push(... fullSummaryText);
 
-        let descriptionOfResolution = truncateFormatIndent(proposal.details, secondHeading);
+        let descriptionOfResolution = truncateFormatIndent(proposal.desire, secondHeading);
         fullResolutionText.push(...descriptionOfResolution);
 
     }

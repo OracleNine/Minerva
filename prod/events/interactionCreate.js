@@ -64,7 +64,7 @@ exports.default = {
             if (config_json_1.peerResolutionClasses.indexOf(interaction.customId) !== -1) {
                 // Make sure the modal is one of the peer resolution classes
                 if (!(interaction.member instanceof discord_js_1.GuildMember) || !(interaction.member.roles.cache.has(config_json_1.peerId))) {
-                    await interaction.reply("Submission failed. Make sure you are doing this channel on the TCH server, and that you are a Peer.");
+                    await interaction.reply("Submission failed.");
                 }
                 else {
                     const newProposal = new structures_js_1.ProposalObject();
