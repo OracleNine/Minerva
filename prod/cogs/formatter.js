@@ -109,6 +109,9 @@ function addIndent(text) {
     for (let i = 0; i < lineBy.length; i++) {
         let line = lineBy[i];
         if (line != "") {
+            if (line?.startsWith("> ") || line?.startsWith(">")) {
+                line.replace(">", "\>");
+            }
             finalSummary += "> " + line + "\n";
         }
     }
